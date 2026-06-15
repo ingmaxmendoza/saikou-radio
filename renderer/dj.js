@@ -18,13 +18,14 @@ function buildDJScript(currentTrack, nextTrack, timeStr, phrase) {
   }
 
   parts.push(`It's ${timeStr}.`)
-  parts.push(phrase)
+  if (phrase) parts.push(phrase)
   parts.push("You're listening to Saikou Radio.")
 
   return parts.join(' ')
 }
 
 function pickRandom(arr) {
+  if (!arr || arr.length === 0) return ''
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
@@ -45,6 +46,8 @@ class DJEngine {
     const settings = this._getSettings()
     const playlist = this._getPlaylist()
     const currentTrack = playlist.currentTrack()
+
+    if (!currentTrack) return  // nothing to announce
     const nextIndex = (playlist.currentIndex + 1) % playlist.tracks.length
     const nextTrack = playlist.tracks[nextIndex] ?? null
 
