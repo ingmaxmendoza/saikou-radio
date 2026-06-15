@@ -70,19 +70,12 @@ function updateNowPlaying() {
 }
 
 // --- Metadata ---
-async function loadMetadata(track) {
-  try {
-    const meta = await window.saikouAPI.readMetadata(track.path)
-    if (meta.title)  track.title  = meta.title
-    if (meta.artist) track.artist = meta.artist
-    if (meta.picture) {
-      albumArt.src = meta.picture
-      albumArt.classList.add('visible')
-    } else {
-      albumArt.src = ''
-      albumArt.classList.remove('visible')
-    }
-  } catch {
+function showAlbumArt(track) {
+  const pic = track._picture
+  if (pic) {
+    albumArt.src = pic
+    albumArt.classList.add('visible')
+  } else {
     albumArt.src = ''
     albumArt.classList.remove('visible')
   }
@@ -98,7 +91,7 @@ async function playTrackAt(index) {
   playlist.jumpTo(index)
   const track = playlist.currentTrack()
   updateNowPlaying()
-  loadMetadata(track).then(() => updateNowPlaying())
+  showAlbumArt(track)
   try {
     playAttempts = 0
     await audio.playFile(track.path)
@@ -203,6 +196,17 @@ $('open-btn').onclick = async () => {
       djStatus.textContent = 'No tracks found in playlist.'
       return
     }
+    djStatus.textContent = 'Loading metadata...'
+    // Load all track metadata upfront so playlist shows real names immediately
+    await Promise.all(playlist.tracks.map(async (track) => {
+      try {
+        const meta = await window.saikouAPI.readMetadata(track.path)
+        if (meta.title)  track.title  = meta.title
+        if (meta.artist) track.artist = meta.artist
+        track._picture = meta.picture  // cache for when track plays
+      } catch {}
+    }))
+    renderPlaylist()
     djStatus.textContent = ''
     if (scheduler) scheduler.stop()
     scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })

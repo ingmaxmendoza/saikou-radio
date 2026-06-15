@@ -85,6 +85,42 @@ function registerIpcHandlers() {
     return result.canceled ? null : result.filePaths[0]
   })
 
+  ipcMain.handle('tts:listVoices', async (_e, engine) => {
+    if (engine === 'sapi') {
+      const { execSync } = require('child_process')
+      try {
+        const script = `
+Add-Type -AssemblyName System.Speech
+$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+$s.GetInstalledVoices() | ForEach-Object {
+  $v = $_.VoiceInfo
+  "$($v.Name)|$($v.Culture)|$($v.Gender)"
+}
+`
+        const out = execSync(`powershell -NoProfile -Command "${script.replace(/\n/g, ' ')}"`, { timeout: 8000 }).toString()
+        return out.trim().split('\n').filter(Boolean).map(line => {
+          const [name, culture, gender] = line.trim().split('|')
+          return { name, culture, gender }
+        })
+      } catch {
+        return []
+      }
+    }
+    // Edge TTS — return a curated list of common EN/ES neural voices
+    return [
+      { name: 'en-US-AriaNeural',    culture: 'en-US', gender: 'Female' },
+      { name: 'en-US-GuyNeural',     culture: 'en-US', gender: 'Male'   },
+      { name: 'en-US-JennyNeural',   culture: 'en-US', gender: 'Female' },
+      { name: 'en-US-DavisNeural',   culture: 'en-US', gender: 'Male'   },
+      { name: 'en-GB-SoniaNeural',   culture: 'en-GB', gender: 'Female' },
+      { name: 'en-GB-RyanNeural',    culture: 'en-GB', gender: 'Male'   },
+      { name: 'es-MX-DaliaNeural',   culture: 'es-MX', gender: 'Female' },
+      { name: 'es-MX-JorgeNeural',   culture: 'es-MX', gender: 'Male'   },
+      { name: 'es-ES-ElviraNeural',  culture: 'es-ES', gender: 'Female' },
+      { name: 'es-ES-AlvaroNeural',  culture: 'es-ES', gender: 'Male'   },
+    ]
+  })
+
   ipcMain.handle('metadata:read', async (_e, filePath) => {
     try {
       const { parseFile } = await import('music-metadata')
