@@ -15,6 +15,7 @@ let scheduler = null
 let isPlaying = false
 let breakPending = false
 let countdownIntervalId = null
+let currentArtist = ''
 
 // --- DOM refs ---
 const $ = (id) => document.getElementById(id)
@@ -61,7 +62,8 @@ function updateNowPlaying() {
   const t = playlist.currentTrack()
   if (!t) return
   trackTitle.textContent = t.title || 'Unknown'
-  trackMeta.textContent = t.artist || ''
+  currentArtist = t.artist || ''
+  trackMeta.textContent = currentArtist
   renderPlaylist()
 }
 
@@ -111,8 +113,18 @@ audio.onTrackEnd(async () => {
   }
 })
 
+function formatTime(secs) {
+  const m = Math.floor(secs / 60)
+  const s = Math.floor(secs % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
 audio.onTimeUpdate((elapsed, duration) => {
-  if (duration > 0) progressFill.style.width = `${(elapsed / duration) * 100}%`
+  if (duration > 0) {
+    progressFill.style.width = `${(elapsed / duration) * 100}%`
+    const timeStr = `${formatTime(elapsed)} / ${formatTime(duration)}`
+    trackMeta.textContent = currentArtist ? `${currentArtist} · ${timeStr}` : timeStr
+  }
 })
 
 // --- Countdown display ---
