@@ -1,23 +1,41 @@
 // renderer/dj.js
 
+const HEARD_TEMPLATES = [
+  (t, a) => a ? `You just heard ${t} by ${a}.` : `You just heard ${t}.`,
+  (t, a) => a ? `That was ${t} from ${a}.` : `That was ${t}.`,
+  (t, a) => a ? `${a} with ${t} — hope you enjoyed that one.` : `That was ${t} — hope you enjoyed it.`,
+  (t, a) => a ? `Fresh off the playlist, ${t} by ${a}.` : `That one was ${t}.`,
+  (t, a) => a ? `${t} by ${a}, doing what it does.` : `${t}, right there.`,
+]
+
+const NEXT_TEMPLATES = [
+  (t, a) => a ? `Coming up next: ${t} by ${a}.` : `Coming up next: ${t}.`,
+  (t, a) => a ? `Next up, ${a} with ${t}.` : `Next up, ${t}.`,
+  (t, a) => a ? `Stick around for ${t} by ${a}.` : `Stick around for ${t}.`,
+  (t, a) => a ? `Up next — ${t} from ${a}.` : `And then we've got ${t} coming your way.`,
+]
+
+const TIME_TEMPLATES = [
+  (s) => `It's ${s}.`,
+  (s) => `Clock's showing ${s}.`,
+  (s) => `The time right now is ${s}.`,
+  (s) => `${s} on the dot.`,
+]
+
 function buildDJScript(currentTrack, nextTrack, timeStr, phrase) {
   const parts = []
 
-  if (currentTrack.artist) {
-    parts.push(`You just heard ${currentTrack.title} by ${currentTrack.artist}.`)
-  } else {
-    parts.push(`You just heard ${currentTrack.title}.`)
-  }
+  const heardFn = HEARD_TEMPLATES[Math.floor(Math.random() * HEARD_TEMPLATES.length)]
+  parts.push(heardFn(currentTrack.title, currentTrack.artist))
 
   if (nextTrack) {
-    if (nextTrack.artist) {
-      parts.push(`Coming up next: ${nextTrack.title} by ${nextTrack.artist}.`)
-    } else {
-      parts.push(`Coming up next: ${nextTrack.title}.`)
-    }
+    const nextFn = NEXT_TEMPLATES[Math.floor(Math.random() * NEXT_TEMPLATES.length)]
+    parts.push(nextFn(nextTrack.title, nextTrack.artist))
   }
 
-  parts.push(`It's ${timeStr}.`)
+  const timeFn = TIME_TEMPLATES[Math.floor(Math.random() * TIME_TEMPLATES.length)]
+  parts.push(timeFn(timeStr))
+
   if (phrase) parts.push(phrase)
   parts.push("You're listening to Saikou Radio.")
 

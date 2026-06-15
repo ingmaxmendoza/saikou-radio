@@ -86,8 +86,8 @@ function registerIpcHandlers() {
   })
 
   ipcMain.handle('metadata:read', async (_e, filePath) => {
-    const { parseFile } = require('music-metadata')
     try {
+      const { parseFile } = await import('music-metadata')
       const meta = await parseFile(filePath, { skipCovers: false })
       const { title, artist, album, picture } = meta.common
       let pictureDataUrl = null
@@ -96,7 +96,8 @@ function registerIpcHandlers() {
         pictureDataUrl = `data:${pic.format};base64,${Buffer.from(pic.data).toString('base64')}`
       }
       return { title: title || null, artist: artist || null, album: album || null, picture: pictureDataUrl }
-    } catch {
+    } catch (err) {
+      console.error('[metadata:read]', err.message)
       return { title: null, artist: null, album: null, picture: null }
     }
   })

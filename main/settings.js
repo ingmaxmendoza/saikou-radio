@@ -19,6 +19,11 @@ const DEFAULTS = {
     "Don't touch that dial — more heat coming up.",
     "You're tuned in to the best station on your hard drive.",
     "Sit back, relax, and let Saikou Radio do the work.",
+    "No ads, no interruptions — just the music.",
+    "We don't take requests, but we do take care of you.",
+    "Another hour, another set of bangers. Let's go.",
+    "If you're working, keep grinding. We've got the soundtrack.",
+    "This has been your regularly scheduled vibe check.",
   ],
 }
 
