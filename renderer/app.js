@@ -45,6 +45,7 @@ async function loadSettings() {
   theme.apply(settings.theme, settings.customThemePath)
   djEngineEl.textContent = (settings.ttsEngine || 'edge').toUpperCase()
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
+  audio.setFadeDuration(settings.fadeSeconds ?? 2)
 }
 
 // --- Playlist rendering ---
