@@ -13,6 +13,16 @@ const DEFAULTS = {
   loop: true,
   shuffle: false,
   alwaysOnTop: false,
+  personalityPhrasesES: [
+    "Sigue sintonizado, esto es Saikou Radio.",
+    "Mantenemos el flow toda la noche.",
+    "No cambies de estación — viene más música.",
+    "Sintonizado a la mejor estación de tu disco duro.",
+    "Sin anuncios, sin interrupciones — pura música.",
+    "Otro set, otro bloque de bangers. Vamos.",
+    "Si estás trabajando, sigue adelante. Nosotros ponemos el soundtrack.",
+    "Este ha sido tu chequeo de vibras programado.",
+  ],
   personalityPhrases: [
     "Stay locked in, this is Saikou Radio.",
     "We keep the vibes flowing, all day long.",
