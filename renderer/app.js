@@ -1,0 +1,175 @@
+// renderer/app.js
+const { PlaylistManager } = require('./playlist')
+const { AudioPlayer } = require('./audio')
+const { BreakScheduler } = require('./scheduler')
+const { DJEngine } = require('./dj')
+const { ThemeEngine } = require('./theme')
+const fs = require('fs')
+const path = require('path')
+
+let settings = {}
+let playlist = new PlaylistManager()
+let audio = new AudioPlayer()
+let theme = new ThemeEngine()
+let scheduler = null
+let isPlaying = false
+let breakPending = false
+let countdownIntervalId = null
+
+// --- DOM refs ---
+const $ = (id) => document.getElementById(id)
+const trackTitle = $('track-title')
+const trackMeta = $('track-meta')
+const progressFill = $('progress-fill')
+const playlistList = $('playlist-list')
+const djCountdown = $('dj-countdown')
+const djEngineEl = $('dj-engine')
+const djJingles = $('dj-jingles')
+const djStatus = $('dj-status')
+const clockEl = $('clock')
+const btnPlay = $('btn-play')
+
+// --- Clock ---
+function updateClock() {
+  clockEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+setInterval(updateClock, 1000)
+updateClock()
+
+// --- Settings ---
+async function loadSettings() {
+  settings = await window.saikouAPI.getSettings()
+  theme.apply(settings.theme, settings.customThemePath)
+  djEngineEl.textContent = settings.ttsEngine.toUpperCase()
+  djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
+}
+
+// --- Playlist rendering ---
+function renderPlaylist() {
+  playlistList.innerHTML = ''
+  playlist.tracks.forEach((t, i) => {
+    const div = document.createElement('div')
+    const isActive = i === playlist.currentIndex
+    div.className = 'pl-track' + (t.error ? ' error' : '') + (isActive ? ' active' : '')
+    div.textContent = (isActive ? '► ' : '') + (t.artist ? `${t.artist} - ${t.title}` : t.title)
+    div.onclick = () => playTrackAt(i)
+    playlistList.appendChild(div)
+  })
+}
+
+function updateNowPlaying() {
+  const t = playlist.currentTrack()
+  if (!t) return
+  trackTitle.textContent = t.title || 'Unknown'
+  trackMeta.textContent = t.artist || ''
+  renderPlaylist()
+}
+
+// --- Playback ---
+async function playTrackAt(index) {
+  playlist.jumpTo(index)
+  updateNowPlaying()
+  try {
+    await audio.playFile(playlist.currentTrack().path)
+    isPlaying = true
+    btnPlay.textContent = '⏸'
+  } catch {
+    const t = playlist.currentTrack()
+    if (t) t.error = true
+    renderPlaylist()
+    playNext()
+  }
+}
+
+async function playNext() {
+  playlist.advance(settings.loop)
+  await playTrackAt(playlist.currentIndex)
+}
+
+audio.onTrackEnd(async () => {
+  if (breakPending) {
+    breakPending = false
+    djStatus.textContent = 'ON AIR...'
+    const dj = new DJEngine({
+      playAudioBuffer: (buf) => audio.playBuffer(buf),
+      playJingle: async (folder) => {
+        const files = fs.readdirSync(folder).filter(f => /\.(mp3|wav|ogg)$/i.test(f))
+        if (files.length === 0) return
+        const pick = files[Math.floor(Math.random() * files.length)]
+        await audio.playFile(path.join(folder, pick))
+      },
+      synthesizeTTS: (text, engine, voice) => window.saikouAPI.synthesizeTTS(text, engine, voice),
+      getSettings: () => settings,
+      getPlaylist: () => playlist,
+    })
+    await dj.runBreak()
+    djStatus.textContent = ''
+    scheduler.reset()
+    await playNext()
+  } else {
+    await playNext()
+  }
+})
+
+audio.onTimeUpdate((elapsed, duration) => {
+  if (duration > 0) progressFill.style.width = `${(elapsed / duration) * 100}%`
+})
+
+// --- Countdown display ---
+function startCountdownDisplay() {
+  if (countdownIntervalId) clearInterval(countdownIntervalId)
+  countdownIntervalId = setInterval(() => {
+    if (!scheduler) return
+    const ms = scheduler.remainingMs()
+    const m = Math.floor(ms / 60000)
+    const s = Math.floor((ms % 60000) / 1000)
+    djCountdown.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }, 1000)
+}
+
+// --- Controls ---
+$('btn-prev').onclick = () => {
+  const idx = Math.max(0, playlist.currentIndex - 1)
+  playTrackAt(idx)
+}
+
+btnPlay.onclick = async () => {
+  if (isPlaying) {
+    await audio.pause()
+    isPlaying = false
+    btnPlay.textContent = '▶'
+  } else {
+    await audio.resume()
+    isPlaying = true
+    btnPlay.textContent = '⏸'
+  }
+}
+
+$('btn-next').onclick = playNext
+
+$('open-btn').onclick = async () => {
+  const filePath = await window.saikouAPI.openFileDialog()
+  if (!filePath) return
+  const bytes = await window.saikouAPI.readFileAsBuffer(filePath)
+  const text = new TextDecoder().decode(bytes)
+  playlist.loadFromText(text, filePath)
+  renderPlaylist()
+  if (playlist.tracks.length === 0) return
+
+  if (scheduler) scheduler.stop()
+  scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })
+  scheduler.start()
+  startCountdownDisplay()
+  await playTrackAt(0)
+}
+
+$('settings-btn').onclick = () => {
+  const settingsPath = path.join(__dirname, 'settings.html')
+  const win = window.open(`file://${settingsPath}`, '_blank', 'width=480,height=520,nodeIntegration=1')
+  if (win) {
+    win.addEventListener('beforeunload', () => loadSettings())
+  }
+}
+
+// --- Init ---
+loadSettings()

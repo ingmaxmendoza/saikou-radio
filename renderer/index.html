@@ -1,5 +1,184 @@
 <!DOCTYPE html>
-<html>
-<head><title>Saikou Radio</title></head>
-<body><h1>Saikou Radio</h1></body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Saikou Radio</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-ui, Tahoma, sans-serif);
+      background: var(--bg-primary, #c0c0c8);
+      color: var(--text-primary, #111);
+      user-select: none;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #titlebar {
+      background: var(--bg-secondary, #e4e4e8);
+      border-bottom: 2px solid var(--border-dark, #888);
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #titlebar .logo {
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+    #titlebar .clock { font-size: 11px; color: var(--text-secondary, #444); }
+    #main {
+      display: grid;
+      grid-template-columns: 1fr 200px;
+      grid-template-rows: 1fr auto;
+      height: calc(100vh - 32px);
+    }
+    #player-panel {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-right: 2px solid var(--border-dark, #888);
+    }
+    #lcd {
+      background: var(--bg-lcd, #1a1a2e);
+      color: var(--text-accent, #00e5ff);
+      font-family: var(--font-mono, monospace);
+      padding: 10px;
+      border: 2px inset var(--border-dark, #666);
+      font-size: 13px;
+    }
+    #lcd .track-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #lcd .track-meta { font-size: 10px; color: var(--text-secondary, #88ccdd); margin-top: 3px; }
+    #progress-bar {
+      background: var(--bg-lcd, #003344);
+      height: 6px;
+      margin-top: 6px;
+      cursor: pointer;
+    }
+    #progress-fill { background: var(--text-accent, #00e5ff); height: 6px; width: 0%; transition: width 0.4s linear; }
+    #controls { display: flex; gap: 6px; }
+    .ctrl-btn {
+      flex: 1;
+      background: var(--btn-bg, #d0d0d8);
+      color: var(--btn-text, #111);
+      border: 2px solid var(--border-light, #fff);
+      border-right-color: var(--border-dark, #888);
+      border-bottom-color: var(--border-dark, #888);
+      padding: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: var(--font-ui);
+    }
+    .ctrl-btn:active {
+      border-color: var(--border-dark, #888);
+      border-right-color: var(--border-light, #fff);
+      border-bottom-color: var(--border-light, #fff);
+    }
+    #open-btn {
+      background: var(--btn-bg, #d0d0d8);
+      border: 2px solid var(--border-light, #fff);
+      border-right-color: var(--border-dark, #888);
+      border-bottom-color: var(--border-dark, #888);
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 11px;
+    }
+    #playlist-panel {
+      background: var(--bg-panel, #dcdce4);
+      border-left: 1px solid var(--border-dark, #888);
+      overflow-y: auto;
+      padding: 6px;
+      font-size: 11px;
+    }
+    #playlist-panel .pl-header {
+      font-weight: bold;
+      font-size: 10px;
+      color: var(--text-secondary, #444);
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .pl-track {
+      padding: 3px 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-radius: 2px;
+    }
+    .pl-track:hover { background: var(--bg-secondary, #e4e4e8); }
+    .pl-track.active { color: var(--text-accent, #00e5ff); font-weight: bold; }
+    .pl-track.error { color: #cc4444; }
+    #dj-panel {
+      grid-column: 1 / -1;
+      background: var(--bg-secondary, #e4e4e8);
+      border-top: 2px solid var(--border-dark, #888);
+      padding: 5px 12px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      font-size: 11px;
+    }
+    #dj-panel .dj-item { display: flex; gap: 5px; }
+    #dj-panel .dj-label { color: var(--text-secondary, #555); }
+    #dj-panel .dj-value { font-weight: bold; }
+    #settings-btn {
+      margin-left: auto;
+      background: var(--btn-bg, #d0d0d8);
+      border: 2px solid var(--border-light, #fff);
+      border-right-color: var(--border-dark, #888);
+      border-bottom-color: var(--border-dark, #888);
+      padding: 3px 8px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="titlebar">
+    <span class="logo">SAIKOU RADIO</span>
+    <span class="clock" id="clock">--:-- --</span>
+  </div>
+  <div id="main">
+    <div id="player-panel">
+      <div id="lcd">
+        <div class="track-title" id="track-title">No playlist loaded</div>
+        <div class="track-meta" id="track-meta">Open a .m3u file to begin</div>
+        <div id="progress-bar"><div id="progress-fill"></div></div>
+      </div>
+      <div id="controls">
+        <button class="ctrl-btn" id="btn-prev">⏮</button>
+        <button class="ctrl-btn" id="btn-play">▶</button>
+        <button class="ctrl-btn" id="btn-next">⏭</button>
+      </div>
+      <button id="open-btn">Open Playlist (.m3u)</button>
+    </div>
+    <div id="playlist-panel">
+      <div class="pl-header">Playlist</div>
+      <div id="playlist-list"></div>
+    </div>
+    <div id="dj-panel">
+      <div class="dj-item">
+        <span class="dj-label">DJ BREAK IN:</span>
+        <span class="dj-value" id="dj-countdown">--:--</span>
+      </div>
+      <div class="dj-item">
+        <span class="dj-label">TTS:</span>
+        <span class="dj-value" id="dj-engine">--</span>
+      </div>
+      <div class="dj-item">
+        <span class="dj-label">JINGLES:</span>
+        <span class="dj-value" id="dj-jingles">--</span>
+      </div>
+      <div class="dj-item">
+        <span class="dj-label" id="dj-status"></span>
+      </div>
+      <button id="settings-btn">Settings</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
 </html>
