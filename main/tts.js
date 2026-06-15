@@ -46,8 +46,12 @@ async function synthesize(text, engine, voice) {
   if (engine === 'edge') {
     try {
       return await synthesizeEdge(text, voice)
-    } catch {
-      return await synthesizeSAPI(text, 'Microsoft Zira Desktop')
+    } catch (edgeErr) {
+      console.error('[TTS] Edge failed, falling back to SAPI:', edgeErr.message)
+      // Fall back to SAPI using the same voice if it looks like a SAPI voice name,
+      // otherwise use a safe default
+      const sapiVoice = voice && !voice.includes('Neural') ? voice : 'Microsoft Zira Desktop'
+      return await synthesizeSAPI(text, sapiVoice)
     }
   }
   return await synthesizeSAPI(text, voice)
