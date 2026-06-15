@@ -10,4 +10,5 @@ window.saikouAPI = {
   readFileAsBuffer: (filePath) => ipcRenderer.invoke('fs:readFile', filePath),
   readMetadata: (filePath) => ipcRenderer.invoke('metadata:read', filePath),
   openSettingsWindow: () => ipcRenderer.invoke('window:openSettings'),
+  listVoices: (engine) => ipcRenderer.invoke('tts:listVoices', engine),
 }

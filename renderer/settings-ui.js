@@ -38,13 +38,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   loopCb.checked            = !!settings.loop;
   shuffleCb.checked         = !!settings.shuffle;
   ttsEngine.value           = settings.ttsEngine ?? 'edge';
-  ttsVoice.value            = settings.ttsVoice ?? '';
   personalityArea.value     = (settings.personalityPhrases ?? []).join('\n');
   jinglesEnabled.checked    = !!settings.jinglesEnabled;
   jinglesFolder.value       = settings.jinglesFolder ?? '';
   themeSelect.value         = settings.theme ?? 'y2k-silver';
   customThemePath.value     = settings.customThemePath ?? '';
   alwaysOnTop.checked       = !!settings.alwaysOnTop;
+
+  // ── Voice dropdown ────────────────────────────────────────────────────────
+  async function populateVoices(engine, currentVoice) {
+    ttsVoice.innerHTML = '<option value="">Loading…</option>';
+    const voices = await api.listVoices(engine).catch(() => []);
+    ttsVoice.innerHTML = '';
+    if (voices.length === 0) {
+      ttsVoice.innerHTML = '<option value="">No voices found</option>';
+      return;
+    }
+    voices.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.culture}, ${v.gender})`;
+      ttsVoice.appendChild(opt);
+    });
+    ttsVoice.value = currentVoice || voices[0].name;
+  }
+
+  await populateVoices(settings.ttsEngine ?? 'edge', settings.ttsVoice ?? '');
+
+  ttsEngine.addEventListener('change', () => {
+    populateVoices(ttsEngine.value, '');
+  });
 
   // Apply theme to this window immediately
   applyTheme(themeSelect.value, customThemePath.value);
@@ -104,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       loop:               loopCb.checked,
       shuffle:            shuffleCb.checked,
       ttsEngine:          ttsEngine.value,
-      ttsVoice:           ttsVoice.value.trim(),
+      ttsVoice:           ttsVoice.value,
       personalityPhrases: phrases,
       jinglesEnabled:     jinglesEnabled.checked,
       jinglesFolder:      jinglesFolder.value,
