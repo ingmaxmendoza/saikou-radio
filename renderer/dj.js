@@ -73,6 +73,23 @@ function buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice) {
   return parts.join(' ')
 }
 
+const PHRASE_HISTORY_SIZE = 5
+const _phraseHistory = { en: [], es: [] }
+
+function pickPhrase(arr, lang) {
+  if (!arr || arr.length === 0) return ''
+  const history = _phraseHistory[lang] || []
+  // Filter out recently used phrases; fall back to full list if all were used recently
+  const available = arr.filter(p => !history.includes(p))
+  const pool = available.length > 0 ? available : arr
+  const picked = pool[Math.floor(Math.random() * pool.length)]
+  // Record and trim history
+  history.push(picked)
+  if (history.length > PHRASE_HISTORY_SIZE) history.shift()
+  _phraseHistory[lang] = history
+  return picked
+}
+
 function pickRandom(arr) {
   if (!arr || arr.length === 0) return ''
   return arr[Math.floor(Math.random() * arr.length)]
@@ -113,7 +130,7 @@ class DJEngine {
     const phrases = lang === 'es'
       ? (settings.personalityPhrasesES || [])
       : (settings.personalityPhrases || [])
-    const phrase = pickRandom(phrases)
+    const phrase = pickPhrase(phrases, lang)
     const script = buildDJScript(currentTrack, nextTrack, currentTimeString(), phrase, settings.ttsVoice)
 
     try {
