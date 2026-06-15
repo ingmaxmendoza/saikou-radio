@@ -82,9 +82,10 @@ async function playTrackAt(index) {
     await audio.playFile(playlist.currentTrack().path)
     isPlaying = true
     btnPlay.textContent = '⏸'
-  } catch {
+  } catch (err) {
+    console.error('playTrackAt error:', err)
     const t = playlist.currentTrack()
-    if (t) t.error = true
+    if (t) { t.error = true; djStatus.textContent = `Skip: ${err.message}` }
     renderPlaylist()
     playNext()
   }
@@ -169,19 +170,28 @@ btnPlay.onclick = async () => {
 $('btn-next').onclick = playNext
 
 $('open-btn').onclick = async () => {
-  const filePath = await window.saikouAPI.openFileDialog()
-  if (!filePath) return
-  const bytes = await window.saikouAPI.readFileAsBuffer(filePath)
-  const text = new TextDecoder().decode(bytes)
-  playlist.loadFromText(text, filePath)
-  renderPlaylist()
-  if (playlist.tracks.length === 0) return
-
-  if (scheduler) scheduler.stop()
-  scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })
-  scheduler.start()
-  startCountdownDisplay()
-  await playTrackAt(0)
+  try {
+    const filePath = await window.saikouAPI.openFileDialog()
+    if (!filePath) return
+    const bytes = await window.saikouAPI.readFileAsBuffer(filePath)
+    const buf = bytes instanceof Uint8Array ? bytes : new Uint8Array(Object.values(bytes))
+    const text = new TextDecoder().decode(buf)
+    playlist.loadFromText(text, filePath)
+    renderPlaylist()
+    if (playlist.tracks.length === 0) {
+      djStatus.textContent = 'No tracks found in playlist.'
+      return
+    }
+    djStatus.textContent = ''
+    if (scheduler) scheduler.stop()
+    scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })
+    scheduler.start()
+    startCountdownDisplay()
+    await playTrackAt(0)
+  } catch (err) {
+    djStatus.textContent = `Error: ${err.message}`
+    console.error('open-btn error:', err)
+  }
 }
 
 $('settings-btn').onclick = () => {

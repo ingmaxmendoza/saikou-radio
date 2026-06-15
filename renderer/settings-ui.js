@@ -1,9 +1,16 @@
 'use strict';
 
 // settings-ui.js — loaded by settings.html (nodeIntegration: true)
+// window.open() child windows don't get the preload, so use ipcRenderer directly.
+const { ipcRenderer } = require('electron')
+const api = {
+  getSettings:    ()      => ipcRenderer.invoke('settings:get'),
+  saveSettings:   (s)     => ipcRenderer.invoke('settings:save', s),
+  openFileDialog: (opts)  => ipcRenderer.invoke('dialog:openFile', opts),
+  openFolderDialog:()     => ipcRenderer.invoke('dialog:openFolder'),
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const api = window.saikouAPI;
 
   // ── Element refs ──────────────────────────────────────────────────────────
   const themeLink        = document.getElementById('theme-link');
