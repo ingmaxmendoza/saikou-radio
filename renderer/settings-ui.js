@@ -68,10 +68,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function applyTheme(val, customPath) {
+    const bust = `?v=${Date.now()}`
     if (val === 'custom' && customPath) {
-      themeLink.href = customPath;
+      themeLink.href = `file://${customPath}${bust}`;
     } else {
-      themeLink.href = `../themes/${val}.css`;
+      themeLink.href = `../themes/${val}.css${bust}`;
     }
   }
 
