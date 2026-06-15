@@ -125,6 +125,7 @@ audio.onTrackEnd(async () => {
       synthesizeTTS: (text, engine, voice) => window.saikouAPI.synthesizeTTS(text, engine, voice),
       getSettings: () => settings,
       getPlaylist: () => playlist,
+      onError: (msg) => { djStatus.textContent = `TTS error: ${msg}` },
     })
     await dj.runBreak()
     djStatus.textContent = ''

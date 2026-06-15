@@ -83,12 +83,13 @@ function currentTimeString() {
 }
 
 class DJEngine {
-  constructor({ playAudioBuffer, playJingle, synthesizeTTS, getSettings, getPlaylist }) {
+  constructor({ playAudioBuffer, playJingle, synthesizeTTS, getSettings, getPlaylist, onError }) {
     this._playAudioBuffer = playAudioBuffer
     this._playJingle = playJingle
     this._synthesizeTTS = synthesizeTTS
     this._getSettings = getSettings
     this._getPlaylist = getPlaylist
+    this._onError = onError || null
   }
 
   async runBreak() {
@@ -118,8 +119,9 @@ class DJEngine {
     try {
       const audioBuffer = await this._synthesizeTTS(script, settings.ttsEngine, settings.ttsVoice)
       await this._playAudioBuffer(audioBuffer)
-    } catch {
-      // TTS failure: resume music silently
+    } catch (err) {
+      console.error('[DJEngine] TTS error:', err)
+      if (this._onError) this._onError(err.message)
     }
   }
 }
