@@ -110,26 +110,30 @@ async function playNext() {
   await playTrackAt(playlist.currentIndex)
 }
 
+async function runDJBreak() {
+  breakPending = false
+  djStatus.textContent = 'ON AIR...'
+  const dj = new DJEngine({
+    playAudioBuffer: (buf) => audio.playBuffer(buf),
+    playJingle: async (folder) => {
+      const files = fs.readdirSync(folder).filter(f => /\.(mp3|wav|ogg)$/i.test(f))
+      if (files.length === 0) return
+      const pick = files[Math.floor(Math.random() * files.length)]
+      await audio.playFile(path.join(folder, pick))
+    },
+    synthesizeTTS: (text, engine, voice) => window.saikouAPI.synthesizeTTS(text, engine, voice),
+    getSettings: () => settings,
+    getPlaylist: () => playlist,
+    onError: (msg) => { djStatus.textContent = `TTS error: ${msg}` },
+  })
+  await dj.runBreak()
+  djStatus.textContent = ''
+  if (scheduler) scheduler.reset()
+}
+
 audio.onTrackEnd(async () => {
   if (breakPending) {
-    breakPending = false
-    djStatus.textContent = 'ON AIR...'
-    const dj = new DJEngine({
-      playAudioBuffer: (buf) => audio.playBuffer(buf),
-      playJingle: async (folder) => {
-        const files = fs.readdirSync(folder).filter(f => /\.(mp3|wav|ogg)$/i.test(f))
-        if (files.length === 0) return
-        const pick = files[Math.floor(Math.random() * files.length)]
-        await audio.playFile(path.join(folder, pick))
-      },
-      synthesizeTTS: (text, engine, voice) => window.saikouAPI.synthesizeTTS(text, engine, voice),
-      getSettings: () => settings,
-      getPlaylist: () => playlist,
-      onError: (msg) => { djStatus.textContent = `TTS error: ${msg}` },
-    })
-    await dj.runBreak()
-    djStatus.textContent = ''
-    if (scheduler) scheduler.reset()
+    await runDJBreak()
     await playNext()
   } else {
     await playNext()
@@ -182,7 +186,15 @@ btnPlay.onclick = async () => {
   }
 }
 
-$('btn-next').onclick = playNext
+$('btn-next').onclick = async () => {
+  if (!playlist.tracks || playlist.tracks.length === 0) return
+  if (breakPending) {
+    await runDJBreak()
+    await playNext()
+  } else {
+    await playNext()
+  }
+}
 
 $('open-btn').onclick = async () => {
   try {
