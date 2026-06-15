@@ -4,7 +4,9 @@ const fs = require('fs')
 const path = require('path')
 const { SettingsStore } = require('./settings')
 const { synthesize } = require('./tts')
-const { getMainWindow } = require('./index')
+
+// Lazy-load to avoid circular require (index.js requires ipc.js)
+function getMainWindow() { return require('./index').getMainWindow() }
 
 const ALLOWED_EXTENSIONS = new Set([
   '.mp3', '.m4a', '.flac', '.wav', '.ogg', '.aac', '.opus',
