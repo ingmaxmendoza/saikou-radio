@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     await api.saveSettings(newSettings);
+    if (window.opener) window.opener.postMessage('settings-saved', '*')
     window.close();
   });
 

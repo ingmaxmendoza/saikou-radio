@@ -55,6 +55,22 @@ function registerIpcHandlers() {
     return result.canceled ? null : result.filePaths[0]
   })
 
+  ipcMain.handle('metadata:read', async (_e, filePath) => {
+    const { parseFile } = require('music-metadata')
+    try {
+      const meta = await parseFile(filePath, { skipCovers: false })
+      const { title, artist, album, picture } = meta.common
+      let pictureDataUrl = null
+      if (picture && picture.length > 0) {
+        const pic = picture[0]
+        pictureDataUrl = `data:${pic.format};base64,${Buffer.from(pic.data).toString('base64')}`
+      }
+      return { title: title || null, artist: artist || null, album: album || null, picture: pictureDataUrl }
+    } catch {
+      return { title: null, artist: null, album: null, picture: null }
+    }
+  })
+
   ipcMain.handle('fs:readFile', (_e, filePath) => {
     const ext = path.extname(filePath).toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(ext)) {

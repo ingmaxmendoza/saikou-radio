@@ -30,6 +30,7 @@ const djJingles = $('dj-jingles')
 const djStatus = $('dj-status')
 const clockEl = $('clock')
 const btnPlay = $('btn-play')
+const albumArt = $('album-art')
 
 // --- Clock ---
 function updateClock() {
@@ -68,6 +69,25 @@ function updateNowPlaying() {
   renderPlaylist()
 }
 
+// --- Metadata ---
+async function loadMetadata(track) {
+  try {
+    const meta = await window.saikouAPI.readMetadata(track.path)
+    if (meta.title)  track.title  = meta.title
+    if (meta.artist) track.artist = meta.artist
+    if (meta.picture) {
+      albumArt.src = meta.picture
+      albumArt.classList.add('visible')
+    } else {
+      albumArt.src = ''
+      albumArt.classList.remove('visible')
+    }
+  } catch {
+    albumArt.src = ''
+    albumArt.classList.remove('visible')
+  }
+}
+
 // --- Playback ---
 async function playTrackAt(index) {
   playAttempts++
@@ -76,16 +96,17 @@ async function playTrackAt(index) {
     return
   }
   playlist.jumpTo(index)
+  const track = playlist.currentTrack()
   updateNowPlaying()
+  loadMetadata(track).then(() => updateNowPlaying())
   try {
     playAttempts = 0
-    await audio.playFile(playlist.currentTrack().path)
+    await audio.playFile(track.path)
     isPlaying = true
     btnPlay.textContent = '⏸'
   } catch (err) {
     console.error('playTrackAt error:', err)
-    const t = playlist.currentTrack()
-    if (t) { t.error = true; djStatus.textContent = `Skip: ${err.message}` }
+    if (track) { track.error = true; djStatus.textContent = `Skip: ${err.message}` }
     renderPlaylist()
     playNext()
   }
@@ -196,11 +217,13 @@ $('open-btn').onclick = async () => {
 
 $('settings-btn').onclick = () => {
   const settingsPath = path.join(__dirname, 'settings.html')
-  const win = window.open(`file://${settingsPath}`, '_blank', 'width=480,height=520,nodeIntegration=1')
-  if (win) {
-    win.addEventListener('beforeunload', () => loadSettings())
-  }
+  window.open(`file://${settingsPath}`, '_blank', 'width=480,height=540,nodeIntegration=1')
 }
+
+// Settings window posts 'settings-saved' when the user saves
+window.addEventListener('message', (e) => {
+  if (e.data === 'settings-saved') loadSettings()
+})
 
 // --- Init ---
 loadSettings()

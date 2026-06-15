@@ -8,4 +8,5 @@ window.saikouAPI = {
   openFileDialog: (opts) => ipcRenderer.invoke('dialog:openFile', opts),
   openFolderDialog: () => ipcRenderer.invoke('dialog:openFolder'),
   readFileAsBuffer: (filePath) => ipcRenderer.invoke('fs:readFile', filePath),
+  readMetadata: (filePath) => ipcRenderer.invoke('metadata:read', filePath),
 }
