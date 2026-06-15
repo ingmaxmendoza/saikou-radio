@@ -21,6 +21,12 @@ function getStore() {
 }
 
 function registerIpcHandlers() {
+  // Settings window notifies main window to reload settings after save
+  ipcMain.on('settings:notify-reload', () => {
+    const win = getMainWindow()
+    if (win) win.webContents.send('settings:reload')
+  })
+
   ipcMain.handle('settings:get', () => getStore().get())
 
   ipcMain.handle('settings:save', (_e, partial) => {

@@ -220,10 +220,9 @@ $('settings-btn').onclick = () => {
   window.open(`file://${settingsPath}`, '_blank', 'width=480,height=540,nodeIntegration=1')
 }
 
-// Settings window posts 'settings-saved' when the user saves
-window.addEventListener('message', (e) => {
-  if (e.data === 'settings-saved') loadSettings()
-})
+// Settings window triggers a reload via IPC relay through main process
+const { ipcRenderer } = require('electron')
+ipcRenderer.on('settings:reload', () => loadSettings())
 
 // --- Init ---
 loadSettings()
