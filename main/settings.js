@@ -31,8 +31,16 @@ class SettingsStore {
   _load() {
     try {
       const raw = fs.readFileSync(this._file, 'utf8')
-      return { ...DEFAULTS, ...JSON.parse(raw) }
-    } catch {
+      try {
+        return { ...DEFAULTS, ...JSON.parse(raw) }
+      } catch (parseErr) {
+        console.error('[SettingsStore] Corrupt settings.json, using defaults:', parseErr.message)
+        return { ...DEFAULTS }
+      }
+    } catch (readErr) {
+      if (readErr.code !== 'ENOENT') {
+        console.error('[SettingsStore] Could not read settings.json:', readErr.message)
+      }
       return { ...DEFAULTS }
     }
   }
@@ -43,7 +51,9 @@ class SettingsStore {
 
   save(partial) {
     this._data = { ...this._data, ...partial }
-    fs.writeFileSync(this._file, JSON.stringify(this._data, null, 2), 'utf8')
+    const tmp = this._file + '.tmp'
+    fs.writeFileSync(tmp, JSON.stringify(this._data, null, 2), 'utf8')
+    fs.renameSync(tmp, this._file)
     return this.get()
   }
 }
