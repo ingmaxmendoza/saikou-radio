@@ -1,0 +1,12 @@
+appId: com.saikouradio.app
+productName: Saikou Radio
+directories:
+  output: dist
+files:
+  - main/**
+  - renderer/**
+  - themes/**
+  - assets/**
+  - node_modules/**
+win:
+  target: nsis
