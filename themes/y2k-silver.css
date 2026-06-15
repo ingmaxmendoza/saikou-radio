@@ -1,0 +1,16 @@
+/* themes/y2k-silver.css */
+:root {
+  --bg-primary: #c0c0c8;
+  --bg-secondary: #e4e4e8;
+  --bg-panel: #dcdce4;
+  --bg-lcd: #1a1a2e;
+  --text-primary: #111111;
+  --text-secondary: #444444;
+  --text-accent: #00e5ff;
+  --border-light: #ffffff;
+  --border-dark: #888888;
+  --btn-bg: #d0d0d8;
+  --btn-text: #111111;
+  --font-ui: Tahoma, 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
