@@ -7,11 +7,13 @@ const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts')
 
 function buildSAPIScript(text, voice, outPath) {
   const escaped = text.replace(/'/g, "''")
+  const escapedVoice = voice.replace(/'/g, "''")
+  const escapedPath = outPath.replace(/'/g, "''")
   return [
     `Add-Type -AssemblyName System.Speech`,
     `$s = New-Object System.Speech.Synthesis.SpeechSynthesizer`,
-    `try { $s.SelectVoice('${voice}') } catch {}`,
-    `$s.SetOutputToWaveFile('${outPath}')`,
+    `try { $s.SelectVoice('${escapedVoice}') } catch {}`,
+    `$s.SetOutputToWaveFile('${escapedPath}')`,
     `$s.Speak('${escaped}')`,
     `$s.Dispose()`,
   ].join('; ')
@@ -32,10 +34,12 @@ async function synthesizeEdge(text, voice) {
 async function synthesizeSAPI(text, voice) {
   const tmpFile = path.join(os.tmpdir(), `saikou-tts-${Date.now()}.wav`)
   const script = buildSAPIScript(text, voice, tmpFile)
-  execSync(`powershell -NoProfile -Command "${script}"`)
-  const buf = fs.readFileSync(tmpFile)
-  fs.unlinkSync(tmpFile)
-  return buf
+  execSync(`powershell -NoProfile -Command "${script}"`, { timeout: 10000 })
+  try {
+    return fs.readFileSync(tmpFile)
+  } finally {
+    try { fs.unlinkSync(tmpFile) } catch {}
+  }
 }
 
 async function synthesize(text, engine, voice) {
