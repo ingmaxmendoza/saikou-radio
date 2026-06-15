@@ -44,6 +44,7 @@ class AudioPlayer {
     const source = this._ctx.createBufferSource()
     source.buffer = audioBuffer
     source.connect(this._ctx.destination)
+    if (this._ctx.state === 'suspended') this._ctx.resume()
     source.start(0)
     this._source = source
 
