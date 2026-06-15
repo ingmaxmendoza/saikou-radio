@@ -7,13 +7,8 @@ class ThemeEngine {
   }
 
   apply(themeName, customPath) {
-    if (this._link) {
-      this._link.remove()
-      this._link = null
-    }
-
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
+    const link = document.getElementById('theme-link')
+    if (!link) return
 
     if (themeName === 'custom' && customPath) {
       link.href = `file://${customPath}`
@@ -22,9 +17,6 @@ class ThemeEngine {
     } else {
       link.href = `../themes/y2k-silver.css`
     }
-
-    document.head.appendChild(link)
-    this._link = link
   }
 }
 
