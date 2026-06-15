@@ -215,10 +215,7 @@ $('open-btn').onclick = async () => {
   }
 }
 
-$('settings-btn').onclick = () => {
-  const settingsPath = path.join(__dirname, 'settings.html')
-  window.open(`file://${settingsPath}`, '_blank', 'width=480,height=540,nodeIntegration=1')
-}
+$('settings-btn').onclick = () => window.saikouAPI.openSettingsWindow()
 
 // Settings window triggers a reload via IPC relay through main process
 const { ipcRenderer } = require('electron')
