@@ -123,7 +123,7 @@ $s.GetInstalledVoices() | ForEach-Object {
 
   ipcMain.handle('metadata:read', async (_e, filePath) => {
     try {
-      const { parseFile } = await import('music-metadata')
+      const { parseFile } = require('music-metadata')
       const meta = await parseFile(filePath, { skipCovers: false })
       const { title, artist, album, picture } = meta.common
       let pictureDataUrl = null
