@@ -44,3 +44,9 @@ test('save merges with defaults', () => {
   expect(s.shuffle).toBe(true)
   expect(s.loop).toBe(true) // unchanged default
 })
+
+test('falls back to defaults on corrupt settings file', () => {
+  fs.writeFileSync(path.join(tmpDir, 'settings.json'), '{broken json')
+  const s = new SettingsStore(tmpDir)
+  expect(s.get().breakInterval).toBe(15)
+})
