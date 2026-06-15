@@ -25,7 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cancelBtn        = document.getElementById('cancel-btn');
 
   // ── Load settings ─────────────────────────────────────────────────────────
-  const settings = await api.getSettings();
+  let settings;
+  try {
+    settings = await api.getSettings();
+  } catch (err) {
+    console.error('Failed to load settings:', err);
+    alert('Failed to load settings');
+    return;
+  }
 
   breakInterval.value       = settings.breakInterval ?? 15;
   loopCb.checked            = !!settings.loop;
@@ -42,6 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Apply theme to this window immediately
   applyTheme(themeSelect.value, customThemePath.value);
   toggleCustomCssRow(themeSelect.value);
+
+  // ── Jingles enabled checkbox ──────────────────────────────────────────────
+  browseJingles.disabled = !jinglesEnabled.checked;
+  jinglesEnabled.addEventListener('change', () => {
+    browseJingles.disabled = !jinglesEnabled.checked;
+  });
 
   // ── Theme select change ───────────────────────────────────────────────────
   themeSelect.addEventListener('change', () => {
