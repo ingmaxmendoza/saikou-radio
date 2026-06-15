@@ -1,5 +1,5 @@
 // main/ipc.js
-const { ipcMain, dialog, app } = require('electron')
+const { ipcMain, dialog, app, BrowserWindow } = require('electron')
 const fs = require('fs')
 const path = require('path')
 const { SettingsStore } = require('./settings')
@@ -7,6 +7,8 @@ const { synthesize } = require('./tts')
 
 // Lazy-load to avoid circular require (index.js requires ipc.js)
 function getMainWindow() { return require('./index').getMainWindow() }
+
+let settingsWindow = null
 
 const ALLOWED_EXTENSIONS = new Set([
   '.mp3', '.m4a', '.flac', '.wav', '.ogg', '.aac', '.opus',
@@ -21,7 +23,29 @@ function getStore() {
 }
 
 function registerIpcHandlers() {
-  // Settings window notifies main window to reload settings after save
+  ipcMain.handle('window:openSettings', () => {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      settingsWindow.focus()
+      return
+    }
+    settingsWindow = new BrowserWindow({
+      width: 480,
+      height: 560,
+      resizable: false,
+      title: 'Settings',
+      parent: getMainWindow(),
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+        preload: path.join(__dirname, 'preload.js'),
+      },
+    })
+    settingsWindow.setMenu(null)
+    settingsWindow.loadFile(path.join(__dirname, '../renderer/settings.html'))
+    settingsWindow.on('closed', () => { settingsWindow = null })
+  })
+
+  // Settings window signals save → relay to main renderer
   ipcMain.on('settings:notify-reload', () => {
     const win = getMainWindow()
     if (win) win.webContents.send('settings:reload')
