@@ -1,0 +1,16 @@
+/* themes/blueberry-xp.css */
+:root {
+  --bg-primary: #2a3a6e;
+  --bg-secondary: #3a4a8e;
+  --bg-panel: #1e2e5e;
+  --bg-lcd: #111830;
+  --text-primary: #ffffff;
+  --text-secondary: #aabbdd;
+  --text-accent: #66aaff;
+  --border-light: #6688cc;
+  --border-dark: #111830;
+  --btn-bg: #3a4a8e;
+  --btn-text: #ffffff;
+  --font-ui: Tahoma, 'Segoe UI', Arial, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}

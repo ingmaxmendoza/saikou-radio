@@ -1,0 +1,16 @@
+/* themes/dark-lcd.css */
+:root {
+  --bg-primary: #0d0d12;
+  --bg-secondary: #1a1a24;
+  --bg-panel: #14141e;
+  --bg-lcd: #000810;
+  --text-primary: #00e5ff;
+  --text-secondary: #88ccdd;
+  --text-accent: #00ffaa;
+  --border-light: #00e5ff44;
+  --border-dark: #003344;
+  --btn-bg: #1a2a30;
+  --btn-text: #00e5ff;
+  --font-ui: 'Courier New', monospace;
+  --font-mono: 'Courier New', monospace;
+}
