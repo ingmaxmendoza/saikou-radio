@@ -8,6 +8,7 @@ const fs = require('fs')
 const path = require('path')
 
 let settings = {}
+let playAttempts = 0
 let playlist = new PlaylistManager()
 let audio = new AudioPlayer()
 let theme = new ThemeEngine()
@@ -41,7 +42,7 @@ updateClock()
 async function loadSettings() {
   settings = await window.saikouAPI.getSettings()
   theme.apply(settings.theme, settings.customThemePath)
-  djEngineEl.textContent = settings.ttsEngine.toUpperCase()
+  djEngineEl.textContent = (settings.ttsEngine || 'edge').toUpperCase()
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
 }
 
@@ -69,9 +70,15 @@ function updateNowPlaying() {
 
 // --- Playback ---
 async function playTrackAt(index) {
+  playAttempts++
+  if (playAttempts > playlist.tracks.length) {
+    playAttempts = 0
+    return
+  }
   playlist.jumpTo(index)
   updateNowPlaying()
   try {
+    playAttempts = 0
     await audio.playFile(playlist.currentTrack().path)
     isPlaying = true
     btnPlay.textContent = '⏸'
@@ -106,7 +113,7 @@ audio.onTrackEnd(async () => {
     })
     await dj.runBreak()
     djStatus.textContent = ''
-    scheduler.reset()
+    if (scheduler) scheduler.reset()
     await playNext()
   } else {
     await playNext()
@@ -141,11 +148,13 @@ function startCountdownDisplay() {
 
 // --- Controls ---
 $('btn-prev').onclick = () => {
+  if (!playlist.tracks || playlist.tracks.length === 0) return
   const idx = Math.max(0, playlist.currentIndex - 1)
   playTrackAt(idx)
 }
 
 btnPlay.onclick = async () => {
+  if (!playlist.tracks || playlist.tracks.length === 0) return
   if (isPlaying) {
     await audio.pause()
     isPlaying = false
