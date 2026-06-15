@@ -13,6 +13,7 @@ const DEFAULTS = {
   loop: true,
   shuffle: false,
   alwaysOnTop: false,
+  fadeSeconds: 2,
   personalityPhrasesES: [
     "Sigue sintonizado, esto es Saikou Radio.",
     "Mantenemos el flow toda la noche.",

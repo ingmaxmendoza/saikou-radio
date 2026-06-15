@@ -3,16 +3,21 @@
 class AudioPlayer {
   constructor() {
     this._ctx = new AudioContext()
+    this._gainNode = this._ctx.createGain()
+    this._gainNode.connect(this._ctx.destination)
     this._source = null
     this._onTrackEndCb = null
     this._onTimeUpdateCb = null
     this._tickInterval = null
     this._startedAt = 0
     this._duration = 0
+    this._fadeDuration = 2  // seconds, set via setFadeDuration()
+    this._fadingOut = false
   }
 
   onTrackEnd(cb) { this._onTrackEndCb = cb }
   onTimeUpdate(cb) { this._onTimeUpdateCb = cb }
+  setFadeDuration(secs) { this._fadeDuration = secs >= 0 ? secs : 0 }
 
   async playFile(filePath) {
     await this._stop()
@@ -40,19 +45,41 @@ class AudioPlayer {
 
     this._duration = audioBuffer.duration
     this._startedAt = this._ctx.currentTime
+    this._fadingOut = false
 
     const source = this._ctx.createBufferSource()
     source.buffer = audioBuffer
-    source.connect(this._ctx.destination)
+    source.connect(this._gainNode)
     if (this._ctx.state === 'suspended') this._ctx.resume()
+
+    // Fade in (only for main tracks, not TTS/jingles)
+    const fd = this._fadeDuration
+    if (emitEnd && fd > 0) {
+      this._gainNode.gain.cancelScheduledValues(this._ctx.currentTime)
+      this._gainNode.gain.setValueAtTime(0, this._ctx.currentTime)
+      this._gainNode.gain.linearRampToValueAtTime(1, this._ctx.currentTime + fd)
+    } else {
+      this._gainNode.gain.cancelScheduledValues(this._ctx.currentTime)
+      this._gainNode.gain.setValueAtTime(1, this._ctx.currentTime)
+    }
+
     source.start(0)
     this._source = source
 
+    // Poll for time updates and fade-out trigger
     this._tickInterval = setInterval(() => {
-      if (this._onTimeUpdateCb) {
-        this._onTimeUpdateCb(this._ctx.currentTime - this._startedAt, this._duration)
+      const elapsed = this._ctx.currentTime - this._startedAt
+      if (this._onTimeUpdateCb) this._onTimeUpdateCb(elapsed, this._duration)
+
+      // Trigger fade out when remaining time <= fade duration
+      const remaining = this._duration - elapsed
+      if (emitEnd && fd > 0 && !this._fadingOut && remaining > 0 && remaining <= fd) {
+        this._fadingOut = true
+        this._gainNode.gain.cancelScheduledValues(this._ctx.currentTime)
+        this._gainNode.gain.setValueAtTime(this._gainNode.gain.value, this._ctx.currentTime)
+        this._gainNode.gain.linearRampToValueAtTime(0, this._ctx.currentTime + remaining)
       }
-    }, 500)
+    }, 200)
 
     source.onended = () => {
       clearInterval(this._tickInterval)
@@ -64,6 +91,9 @@ class AudioPlayer {
   }
 
   async _stop() {
+    // Instant stop — no fade needed (user is explicitly stopping/skipping)
+    this._gainNode.gain.cancelScheduledValues(this._ctx.currentTime)
+    this._gainNode.gain.setValueAtTime(1, this._ctx.currentTime)
     if (this._source) {
       this._source.onended = null
       try { this._source.stop() } catch {}

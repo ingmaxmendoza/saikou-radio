@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ── Element refs ──────────────────────────────────────────────────────────
   const themeLink        = document.getElementById('theme-link');
+  const fadeSeconds      = document.getElementById('fade-seconds');
+  const fadeSecondsVal   = document.getElementById('fade-seconds-val');
   const breakInterval    = document.getElementById('break-interval');
   const loopCb           = document.getElementById('loop');
   const shuffleCb        = document.getElementById('shuffle');
@@ -34,6 +36,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  const fv = settings.fadeSeconds ?? 2;
+  fadeSeconds.value         = fv;
+  fadeSecondsVal.textContent = fv + 's';
+  fadeSeconds.addEventListener('input', () => {
+    fadeSecondsVal.textContent = fadeSeconds.value + 's';
+  });
   breakInterval.value       = settings.breakInterval ?? 15;
   loopCb.checked            = !!settings.loop;
   shuffleCb.checked         = !!settings.shuffle;
@@ -123,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       .filter(l => l.length > 0);
 
     const newSettings = {
+      fadeSeconds:        parseFloat(fadeSeconds.value) || 0,
       breakInterval:      parseInt(breakInterval.value, 10) || 15,
       loop:               loopCb.checked,
       shuffle:            shuffleCb.checked,
