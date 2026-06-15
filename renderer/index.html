@@ -48,7 +48,20 @@
       padding: 10px;
       border: 2px inset var(--border-dark, #666);
       font-size: 13px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
     }
+    #album-art {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border: 1px solid var(--border-dark, #333);
+      flex-shrink: 0;
+      display: none;
+    }
+    #album-art.visible { display: block; }
+    #lcd-text { flex: 1; min-width: 0; }
     #lcd .track-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     #lcd .track-meta { font-size: 10px; color: var(--text-secondary, #88ccdd); margin-top: 3px; }
     #progress-bar {
@@ -146,9 +159,12 @@
   <div id="main">
     <div id="player-panel">
       <div id="lcd">
-        <div class="track-title" id="track-title">No playlist loaded</div>
-        <div class="track-meta" id="track-meta">Open a .m3u file to begin</div>
-        <div id="progress-bar"><div id="progress-fill"></div></div>
+        <img id="album-art" alt="">
+        <div id="lcd-text">
+          <div class="track-title" id="track-title">No playlist loaded</div>
+          <div class="track-meta" id="track-meta">Open a .m3u file to begin</div>
+          <div id="progress-bar"><div id="progress-fill"></div></div>
+        </div>
       </div>
       <div id="controls">
         <button class="ctrl-btn" id="btn-prev">⏮</button>
