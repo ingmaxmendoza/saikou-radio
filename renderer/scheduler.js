@@ -8,9 +8,11 @@ class BreakScheduler {
   }
 
   start() {
+    this.stop()
     this._startedAt = Date.now()
     this._timer = setTimeout(() => {
       this._timer = null
+      this._startedAt = null
       this._onFire()
     }, this._intervalMs)
   }
