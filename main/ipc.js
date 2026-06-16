@@ -138,6 +138,78 @@ $s.GetInstalledVoices() | ForEach-Object {
     }
   })
 
+  let miniMoveListener = null
+
+  function snapMiniToCorner(win) {
+    const { screen } = require('electron')
+    const { workArea } = screen.getPrimaryDisplay()
+    const [w, h] = win.getSize()
+    const [x] = win.getPosition()
+    const winCenterX = x + w / 2
+    const screenCenterX = workArea.x + workArea.width / 2
+    if (winCenterX < screenCenterX) {
+      // snap bottom-left
+      win.setPosition(workArea.x, workArea.y + workArea.height - h)
+    } else {
+      // snap bottom-right
+      win.setPosition(workArea.x + workArea.width - w, workArea.y + workArea.height - h)
+    }
+  }
+
+  ipcMain.handle('window:mini', () => {
+    const win = getMainWindow()
+    if (!win) return
+    const { screen } = require('electron')
+    const { workArea } = screen.getPrimaryDisplay()
+    win.setResizable(true)
+    win.setContentSize(480, 100)
+    const [w, h] = win.getSize()
+    // Start bottom-right
+    win.setPosition(workArea.x + workArea.width - w, workArea.y + workArea.height - h)
+    win.setAlwaysOnTop(true)
+    win.setResizable(false)
+
+    // Snap to nearest corner whenever the window stops moving
+    miniMoveListener = () => snapMiniToCorner(win)
+    win.on('moved', miniMoveListener)
+  })
+
+  ipcMain.handle('window:restore', () => {
+    const win = getMainWindow()
+    if (!win) return
+    const { screen } = require('electron')
+    const { workArea } = screen.getPrimaryDisplay()
+
+    if (miniMoveListener) {
+      win.removeListener('moved', miniMoveListener)
+      miniMoveListener = null
+    }
+
+    win.setResizable(true)
+    win.setContentSize(760, 440)
+    win.setPosition(
+      workArea.x + Math.floor((workArea.width - 760) / 2),
+      workArea.y + Math.floor((workArea.height - 440) / 2)
+    )
+    const store = getStore()
+    win.setAlwaysOnTop(store.get().alwaysOnTop ?? false)
+    win.setResizable(false)
+  })
+
+  ipcMain.handle('window:fullscreen', () => {
+    const win = getMainWindow()
+    if (!win) return
+    win.setResizable(true)
+    win.setFullScreen(true)
+  })
+
+  ipcMain.handle('window:windowed', () => {
+    const win = getMainWindow()
+    if (!win) return
+    win.setFullScreen(false)
+    win.setResizable(false)
+  })
+
   ipcMain.handle('fs:readFile', (_e, filePath) => {
     const ext = path.extname(filePath).toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(ext)) {

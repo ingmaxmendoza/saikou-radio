@@ -2,7 +2,7 @@
 const path = require('path')
 const os = require('os')
 const fs = require('fs')
-const { SettingsStore } = require('../main/settings')
+const { SettingsStore, DEFAULTS } = require('../main/settings')
 
 let store
 let tmpDir
@@ -49,4 +49,18 @@ test('falls back to defaults on corrupt settings file', () => {
   fs.writeFileSync(path.join(tmpDir, 'settings.json'), '{broken json')
   const s = new SettingsStore(tmpDir)
   expect(s.get().breakInterval).toBe(15)
+})
+
+test('Phase 1 visualizer/volume defaults exist', () => {
+  expect(DEFAULTS.volume).toBe(1)
+  expect(DEFAULTS.visualizerStyle).toBe('bars')
+  expect(DEFAULTS.visualizerAutoRotate).toBe(false)
+  expect(DEFAULTS.visualizerRotateEvery).toBe(3)
+  expect(DEFAULTS.ambientArtBackground).toBe(true)
+  expect(DEFAULTS.djSubtitles).toBe(true)
+})
+
+test('existing V1 defaults are untouched', () => {
+  expect(DEFAULTS.fadeSeconds).toBe(2)
+  expect(DEFAULTS.theme).toBe('y2k-silver')
 })

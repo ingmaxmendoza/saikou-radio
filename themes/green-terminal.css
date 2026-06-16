@@ -1,0 +1,88 @@
+/* themes/green-terminal.css — phosphor CRT terminal */
+:root {
+  --bg-primary: #0a0f0a;
+  --bg-secondary: #0d120d;
+  --bg-panel: #080d08;
+  --bg-lcd: #050905;
+  --text-primary: #33ff33;
+  --text-secondary: #1a8c1a;
+  --text-accent: #33ff33;
+  --border-light: #1a8c1a;
+  --border-dark: #0d3d0d;
+  --btn-bg: #0a0f0a;
+  --btn-text: #33ff33;
+  --font-ui: 'Courier New', monospace;
+  --font-mono: 'Courier New', monospace;
+}
+
+body {
+  background: #0a0f0a;
+  color: #33ff33;
+  /* subtle scanline effect */
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+}
+
+#titlebar {
+  background: #0d120d;
+  border-bottom: 1px solid #1a8c1a;
+}
+#titlebar .logo { color: #33ff33; letter-spacing: 4px; text-shadow: 0 0 8px #33ff33; }
+#titlebar .clock { color: #1a8c1a; }
+
+#lcd {
+  background: #050905;
+  color: #33ff33;
+  border: 1px solid #1a8c1a;
+  text-shadow: 0 0 6px #33ff33;
+}
+#lcd .track-title { color: #33ff33; }
+#lcd .track-meta { color: #1a8c1a !important; text-shadow: none; }
+
+#seek-slider {
+  background: linear-gradient(to right, #33ff33 0%, #33ff33 var(--seek-pct,0%), #0d3d0d var(--seek-pct,0%), #0d3d0d 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #33ff33 !important;
+  border: 2px solid #0a0f0a !important;
+  box-shadow: 0 0 6px #33ff33 !important;
+}
+
+.ctrl-btn {
+  background: #0a0f0a !important;
+  color: #33ff33 !important;
+  border: 1px solid #1a8c1a !important;
+  border-right-color: #0d3d0d !important;
+  border-bottom-color: #0d3d0d !important;
+  text-shadow: 0 0 4px #33ff33;
+}
+.ctrl-btn:hover { border-color: #33ff33 !important; }
+.ctrl-btn.active {
+  background: #33ff33 !important;
+  color: #050905 !important;
+  text-shadow: none !important;
+  border-color: #33ff33 !important;
+}
+
+#open-btn, #settings-btn {
+  background: #0a0f0a !important;
+  color: #33ff33 !important;
+  border: 1px solid #1a8c1a !important;
+  text-shadow: 0 0 4px #33ff33;
+}
+#open-btn:hover, #settings-btn:hover { border-color: #33ff33 !important; }
+
+#playlist-panel { background: #080d08; border-left: 1px solid #0d3d0d; }
+#playlist-panel .pl-header { color: #1a8c1a; letter-spacing: 2px; }
+.pl-track { color: #1a8c1a; }
+.pl-track:hover { background: #0d120d; color: #33ff33; text-shadow: 0 0 4px #33ff33; }
+.pl-track.active { color: #33ff33; font-weight: bold; text-shadow: 0 0 6px #33ff33; }
+
+#dj-panel { background: #0d120d; border-top: 1px solid #0d3d0d; }
+#dj-panel .dj-label { color: #1a8c1a; }
+#dj-panel .dj-value { color: #33ff33; text-shadow: 0 0 4px #33ff33; }
