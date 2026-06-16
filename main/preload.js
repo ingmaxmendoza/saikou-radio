@@ -20,4 +20,6 @@ window.saikouAPI = {
   sendRemoteState: (state) => ipcRenderer.send('remote:state', state),
   onRemoteCommand: (cb) => ipcRenderer.on('remote:command', (_e, cmd) => cb(cmd)),
   getRemoteInfo: () => ipcRenderer.invoke('remote:info'),
+  openPlaylists: () => ipcRenderer.invoke('dialog:openPlaylists'),
+  listLibrary: () => ipcRenderer.invoke('library:list'),
 }
