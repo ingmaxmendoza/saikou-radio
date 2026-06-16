@@ -20,6 +20,8 @@ const DEFAULTS = {
   visualizerRotateEvery: 3,
   ambientArtBackground: true,
   djSubtitles: true,
+  remoteEnabled: false,
+  remotePort: 7000,
   personalityPhrasesES: [
     "Sigue sintonizado, esto es Saikou Radio.",
     "Mantenemos el flow toda la noche.",

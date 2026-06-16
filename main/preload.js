@@ -17,4 +17,7 @@ window.saikouAPI = {
   listVoices: (engine) => ipcRenderer.invoke('tts:listVoices', engine),
   setMiniMode: (on) => ipcRenderer.invoke(on ? 'window:mini' : 'window:restore'),
   setFullscreen: (on) => ipcRenderer.invoke(on ? 'window:fullscreen' : 'window:windowed'),
+  sendRemoteState: (state) => ipcRenderer.send('remote:state', state),
+  onRemoteCommand: (cb) => ipcRenderer.on('remote:command', (_e, cmd) => cb(cmd)),
+  getRemoteInfo: () => ipcRenderer.invoke('remote:info'),
 }
