@@ -15,15 +15,17 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 7. [Modules](#modules)
 8. [Themes](#themes)
 9. [DJ Engine & TTS](#dj-engine--tts)
-10. [Settings System](#settings-system)
-11. [Mini Player](#mini-player)
-12. [Playback Engine](#playback-engine)
-13. [Playlist System](#playlist-system)
-14. [Shuffle System](#shuffle-system)
-15. [Metadata Loading](#metadata-loading)
-16. [Build & Packaging](#build--packaging)
-17. [Dependencies](#dependencies)
-18. [Known Quirks](#known-quirks)
+10. [Fullscreen & Visualizers (V2 Phase 1)](#fullscreen--visualizers-v2-phase-1)
+11. [LAN Remote (V2 Phase 2)](#lan-remote-v2-phase-2)
+12. [Settings System](#settings-system)
+13. [Mini Player](#mini-player)
+14. [Playback Engine](#playback-engine)
+15. [Playlist System](#playlist-system)
+16. [Shuffle System](#shuffle-system)
+17. [Metadata Loading](#metadata-loading)
+18. [Build & Packaging](#build--packaging)
+19. [Dependencies](#dependencies)
+20. [Known Quirks](#known-quirks)
 
 ---
 
@@ -32,7 +34,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 2.0.0-phase1 |
+| Version | 2.0.0-phase2 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -179,6 +181,9 @@ All handlers are registered in `main/ipc.js`.
 | `window:restore` | invoke | Restores window to 760×440, centers it, removes corner-snap listener |
 | `window:fullscreen` | invoke | Enters OS fullscreen mode |
 | `window:windowed` | invoke | Exits OS fullscreen mode, restores windowed state |
+| `remote:state` | send | Renderer → main; push live state |
+| `remote:command` | send | Main → renderer; deliver phone command |
+| `remote:info` | invoke | Returns {running, url, qr} |
 
 ### File security (`fs:readFile`)
 
@@ -466,6 +471,84 @@ Optional: the visualizer style can automatically cycle every N tracks. Controlle
 
 ---
 
+## LAN Remote (V2 Phase 2)
+
+A zero-dependency HTTP server for controlling playback from a phone on the same LAN.
+
+### `main/remote-server.js` — RemoteServer
+
+A Node `http` server (no extra transport dependencies) with three route groups:
+
+**Static routes (GET):**
+- `GET /` → serves `renderer/remote/index.html`
+- `GET /remote.js` → serves `renderer/remote/remote.js`
+- `GET /remote.css` → serves `renderer/remote/remote.css`
+
+**Event stream (SSE):**
+- `GET /api/events` → Server-Sent Events stream. On connect, sends the cached full state `{type:'state',...}` with album art and metadata. After that, broadcasts full states on change and lightweight ticks (`{type:'tick',elapsed,duration,isPlaying,volume}`) approximately every second. Phone merges ticks into the last received full state.
+
+**Command endpoint:**
+- `POST /api/command` → Parses `{action,...}` JSON and invokes the `onCommand` callback, which relays to the renderer via IPC.
+
+**Helpers:**
+- `getLanIp(interfaces)` — Returns the first non-internal IPv4 address; falls back to `127.0.0.1`
+- `parseCommand(body)` — Parses JSON and validates `action` is a string
+
+**Core methods:**
+- `start(port)` — Binds server to 0.0.0.0 and the given port (default 7000)
+- `stop()` — Closes server and all SSE connections
+- `broadcastState(state)` — Sends state to all connected clients
+- `getUrl()` — Returns `http://<LAN-IP>:<port>`
+- `isRunning()` — Returns whether server is active
+
+**Lifecycle:**
+Runs only when `remoteEnabled` is true (default false). Started/stopped in `main/ipc.js` (`applyRemoteSetting`) both on settings save and at app launch. Default port is `remotePort` (default 7000).
+
+**Data flow:**
+```
+Phone POST /api/command
+  → RemoteServer._onCommand
+    → main/ipc.js relays to renderer via 'remote:command'
+      → renderer/app.js handles 'remote:command' → updates playback
+
+Renderer changes playback state
+  → renderer/app.js sends 'remote:state' IPC
+    → main/ipc.js broadcasts via remoteServer.broadcastState()
+      → SSE → all phones receive update
+```
+
+### Phone UI & Commands
+
+Located in `renderer/remote/` (index.html, remote.css, remote.js). Mobile-optimized single page with:
+- Current track display with album art
+- Transport controls (play/pause, next, prev, shuffle toggle)
+- Seek slider and time display
+- Volume slider
+- Tappable full playlist
+- Request queue display ("+queue" button)
+- DJ BREAK button (triggers on-demand break)
+
+**Supported commands:**
+- `toggle`, `play`, `pause` — playback control
+- `next`, `prev` — track navigation
+- `shuffle` — toggle shuffle mode
+- `seek` — seek to position
+- `volume` — set master volume
+- `play-index` — play track at index
+- `djbreak` — trigger on-demand DJ break
+- `queue-add` — add track to request queue
+- `queue-remove` — remove from request queue
+
+### Request Queue (`renderer/remote-queue.js`)
+
+Simple FIFO queue helper. `nextFromQueue(queue)` shifts and returns the first item. In `app.js`, `playNext()` checks the queue before normal/shuffle advance.
+
+### Desktop Connect Panel
+
+The `📱` button opens an overlay showing the LAN URL and a QR code (generated via the optional `qrcode` dependency; if unavailable, the URL displays as plain text). Clicking the overlay or the X button closes it.
+
+---
+
 ## Settings System
 
 ### `main/settings.js` — SettingsStore
@@ -497,6 +580,8 @@ Persists settings to `<userData>/settings.json`. `userData` is the Electron app 
 | `visualizerRotateEvery` | `3` | Number of tracks between auto-rotations |
 | `ambientArtBackground` | `true` | Show blurred album art behind the visualizer in fullscreen |
 | `djSubtitles` | `true` | Show DJ spoken line as subtitle overlay during a break |
+| `remoteEnabled` | `false` | Start LAN remote server |
+| `remotePort` | `7000` | LAN server port |
 
 ### Settings Window
 
@@ -721,6 +806,7 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | 1.1.1 | Batched metadata loading with live progress counter |
 | 1.1.2 | DJ announces correct next track in shuffle mode |
 | 2.0.0-phase1 | V2 Phase 1: fullscreen mode, VisualizerEngine (bars/scope/radial/particles), master volume, ambient art background, DJ subtitles, keyboard shortcuts |
+| 2.0.0-phase2 | V2 Phase 2: LAN remote control from phone, request queue, QR connect panel |
 
 ---
 
@@ -733,6 +819,7 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | `msedge-tts` | ^2.0.5 | Microsoft Edge neural TTS API |
 | `music-metadata` | ^7.14.0 | Audio file metadata parsing (ID3, Vorbis, etc.) |
 | `98.css` | ^0.1.21 | Windows 98 UI stylesheet (used only for win98 theme) |
+| `qrcode` | ^1.5.4 | QR code generation for the remote connect panel |
 
 ### Dev
 
