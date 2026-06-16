@@ -25,8 +25,10 @@ test('returns defaults when no file exists', () => {
   expect(s.loop).toBe(true)
   expect(s.shuffle).toBe(false)
   expect(s.alwaysOnTop).toBe(false)
+  // Personality phrases are now OPTIONAL extras layered on top of the DJ's
+  // built-in rotation (see renderer/dj-content.js), so they default to empty.
   expect(s.personalityPhrases).toBeInstanceOf(Array)
-  expect(s.personalityPhrases.length).toBeGreaterThan(0)
+  expect(s.personalityPhrasesES).toBeInstanceOf(Array)
 })
 
 test('saves and reloads settings', () => {

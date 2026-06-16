@@ -92,7 +92,8 @@ saikou/
 │   ├── audio.js          # AudioPlayer (Web Audio API)
 │   ├── playlist.js       # PlaylistManager (M3U parser)
 │   ├── scheduler.js      # BreakScheduler (DJ countdown)
-│   ├── dj.js             # DJEngine + buildDJScript
+│   ├── dj.js             # DJEngine + buildDJScript + composeBreak
+│   ├── dj-content.js     # Deck system + all bilingual DJ content banks
 │   ├── theme.js          # ThemeEngine
 │   ├── settings.html     # Settings window UI
 │   └── settings-ui.js    # Settings window logic
@@ -329,23 +330,58 @@ All themes use CSS custom properties:
 
 ## DJ Engine & TTS
 
+### `renderer/dj-content.js` — content banks + Deck system
+
+All spoken content lives here, hand-authored in **both languages** (EN + ES), fully offline.
+Selection uses a **Deck** (shuffle-bag): each deck deals every item exactly once before
+reshuffling, so the order of breaks is effectively never repeated. On reshuffle, the new
+first item is forced to differ from the last item dealt (no back-to-back repeat across the
+cycle boundary). With ~100 variable lines per language, two identical break sequences are
+practically impossible.
+
+**Content banks per language** (≈105 variable lines each, plus expanded structural variants):
+
+| Bank | Count | Notes |
+|---|---|---|
+| `heard` | ~12 | "You just heard …" structural openers |
+| `next` | ~10 | "Coming up next …" (omitted when no next track) |
+| `time` | ~12 | neutral time lines |
+| `timeDaypart` | 3–4 × 4 | daypart-flavored time lines (lateNight / morning / afternoon / evening) |
+| `signoff` | ~10 | station closers — **every break ends here**, all say "Saikou Radio" |
+| `personality` | ~55 | the heart of the DJ |
+| `quips` | ~25 | playful/self-aware + daypart-aware |
+| `facts` | ~25 | music/audio trivia + general — seasoning only |
+
+**Helpers:** `Deck` class; `daypartFor(hour)`; `getStructuralDecks(lang)` and
+`getPersonalityDeck(lang, extra)` (memoized per language; user-added phrases from settings
+are layered on as extras); `pickQuip(lang, hour, rng)` (daypart-filtered, avoids immediate
+repeat); `drawTimeLine(lang, timeStr, hour, rng)` (~40% chance of a daypart-flavored line).
+
 ### `renderer/dj.js`
 
 The DJ script generator. Runs entirely in the renderer.
 
-**`buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice)`**
+**`buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice, opts)`** — pure-ish
+assembler. Draws structural lines (heard / next / time / sign-off) from the decks and joins
+them in order, inserting the supplied personality `phrase` and an optional `opts.bonus` line.
+Section order:
 
-Constructs a natural-language DJ announcement. Template sections:
+1. **Heard** (deck)
+2. **Playlist mention** — `opts.mentionPlaylist && opts.source` only
+3. **Next** (deck) — omitted if `nextTrack` is null
+4. **Time** (deck, sometimes daypart-flavored)
+5. **Phrase** — personality phrase (non-empty only)
+6. **Bonus** — `opts.bonus` quip/fact (non-empty only)
+7. **Sign-off** (deck) — always a Saikou Radio closer
 
-1. **Heard** — "You just heard [Title] by [Artist]." (5 variants per language)
-2. **Next** — "Coming up next: [Title] by [Artist]." (4 variants; omitted if `nextTrack` is null)
-3. **Time** — "It's [time]." (4 variants)
-4. **Phrase** — Custom personality phrase from settings (non-empty only)
-5. **Sign** — Fixed station sign-off ("You're listening to Saikou Radio.")
+**`composeBreak({ currentTrack, nextTrack, timeStr, voice, settings, source, playlistCount, now, rng })`**
+— orchestrates a full break: draws the personality phrase (with user extras layered in),
+rolls the playlist mention, and ~35% of the time adds a **bonus** line — weighted ~70% toward
+a daypart-aware quip and ~30% toward a fun fact — then calls `buildDJScript`. `now`/`rng` are
+injectable for deterministic tests.
 
-**Bilingual support:** `detectLang(voice)` checks if the voice name starts with `es-`. If so, Spanish templates and sign-off are used. English is the default.
-
-**`pickPhrase(arr, lang)`** — Selects a personality phrase with history tracking. Maintains a per-language history of the last 5 picks and filters them out of the available pool to avoid repetition. Falls back to the full list when all phrases have been recently used.
+**Bilingual support:** `detectLang(voice)` checks if the voice name starts with `es-`.
+If so, Spanish banks are used. English is the default.
 
 **`DJEngine`** class (used in `app.js`):
 
@@ -364,12 +400,11 @@ await dj.runBreak()
 **`runBreak()` flow:**
 1. Gets current and next track from playlist
 2. If jingles enabled and folder set, plays a random audio file from that folder
-3. Detects language from `settings.ttsVoice`
-4. Picks personality phrase (avoiding recent repeats)
-5. Builds DJ script via `buildDJScript`
-6. Synthesizes TTS via IPC → main process
-7. Plays returned audio buffer
-8. After completion, `scheduler.reset()` restarts the countdown
+3. Builds the full break script via `composeBreak` (deck-driven, language from `settings.ttsVoice`,
+   personality + optional bonus quip/fact + time awareness)
+4. Synthesizes TTS via IPC → main process
+5. Plays returned audio buffer
+6. After completion, `scheduler.reset()` restarts the countdown
 
 ### `main/tts.js`
 
@@ -666,8 +701,8 @@ Persists settings to `<userData>/settings.json`. `userData` is the Electron app 
 | `shuffle` | `false` | Shuffle playback order |
 | `alwaysOnTop` | `false` | Window always on top |
 | `fadeSeconds` | `2` | Fade in/out duration in seconds |
-| `personalityPhrases` | (25 EN phrases) | English DJ personality phrases |
-| `personalityPhrasesES` | (20 ES phrases) | Spanish DJ personality phrases |
+| `personalityPhrases` | `[]` | **Optional** extra EN phrases, layered on top of the built-in deck (`dj-content.js`) |
+| `personalityPhrasesES` | `[]` | **Optional** extra ES phrases, layered on top of the built-in deck |
 | `volume` | `1` | Master volume (0–1) |
 | `visualizerStyle` | `'bars'` | Active visualizer style (`bars`, `scope`, `radial`, `particles`) |
 | `visualizerAutoRotate` | `false` | Auto-cycle visualizer style every N tracks |
