@@ -671,6 +671,28 @@ $('remote-overlay').onclick = (e) => { if (e.target === $('remote-overlay')) $('
 $('timers-btn').onclick = () => { updateTimerUI(); $('timers-overlay').classList.add('show') }
 $('timers-close').onclick = () => $('timers-overlay').classList.remove('show')
 $('timers-overlay').onclick = (e) => { if (e.target === $('timers-overlay')) $('timers-overlay').classList.remove('show') }
+$('library-btn').onclick = async () => {
+  const items = await window.saikouAPI.listLibrary()
+  const list = $('library-list')
+  list.innerHTML = ''
+  if (!items || items.length === 0) {
+    const e = document.createElement('div')
+    e.className = 'lib-empty'
+    e.textContent = 'No playlists found. Set a Playlists Folder in Settings.'
+    list.appendChild(e)
+  } else {
+    items.forEach(it => {
+      const b = document.createElement('button')
+      b.className = 'lib-item'
+      b.textContent = it.name
+      b.onclick = async () => { $('library-overlay').classList.remove('show'); await loadPlaylists([it.path], { append: true }) }
+      list.appendChild(b)
+    })
+  }
+  $('library-overlay').classList.add('show')
+}
+$('library-close').onclick = () => $('library-overlay').classList.remove('show')
+$('library-overlay').onclick = (e) => { if (e.target === $('library-overlay')) $('library-overlay').classList.remove('show') }
 document.querySelectorAll('#timers-card [data-sleep]').forEach(b => {
   b.onclick = () => setSleep(parseInt(b.getAttribute('data-sleep'), 10))
 })
