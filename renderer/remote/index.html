@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Saikou Remote</title>
+  <link rel="stylesheet" href="/remote.css">
+</head>
+<body>
+  <div id="app">
+    <div id="now">
+      <img id="art" alt="">
+      <div id="meta">
+        <div id="title">Connecting…</div>
+        <div id="artist"></div>
+      </div>
+    </div>
+
+    <div id="seekwrap">
+      <input type="range" id="seek" min="0" max="1000" value="0">
+      <div id="times"><span id="elapsed">0:00</span><span id="duration">0:00</span></div>
+    </div>
+
+    <div id="transport">
+      <button id="prev">⏮</button>
+      <button id="play" class="big">▶</button>
+      <button id="next">⏭</button>
+    </div>
+
+    <div id="row2">
+      <button id="shuffle">RND</button>
+      <button id="djbreak">DJ BREAK</button>
+    </div>
+
+    <div id="volwrap">
+      <span class="lbl">VOL</span>
+      <input type="range" id="vol" min="0" max="100" value="100">
+    </div>
+
+    <div id="queue-section" class="hidden">
+      <div class="hd">Up next (requests)</div>
+      <div id="queue"></div>
+    </div>
+
+    <div id="pl-section">
+      <div class="hd">Playlist — tap to play, ＋ to queue</div>
+      <div id="playlist"></div>
+    </div>
+  </div>
+  <script src="/remote.js"></script>
+</body>
+</html>
