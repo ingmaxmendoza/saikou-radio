@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const { SettingsStore } = require('./settings')
 const { synthesize } = require('./tts')
+const { RemoteServer } = require('./remote-server')
 
 // Lazy-load to avoid circular require (index.js requires ipc.js)
 function getMainWindow() { return require('./index').getMainWindow() }
@@ -16,6 +17,23 @@ const ALLOWED_EXTENSIONS = new Set([
 ])
 
 let store = null
+let remoteServer = null
+
+function applyRemoteSetting(s) {
+  if (s.remoteEnabled) {
+    if (!remoteServer) {
+      remoteServer = new RemoteServer({
+        onCommand: (cmd) => {
+          const win = getMainWindow()
+          if (win) win.webContents.send('remote:command', cmd)
+        },
+      })
+    }
+    if (!remoteServer.isRunning()) remoteServer.start(s.remotePort || 7000)
+  } else if (remoteServer && remoteServer.isRunning()) {
+    remoteServer.stop()
+  }
+}
 
 function getStore() {
   if (!store) store = new SettingsStore(app.getPath('userData'))
@@ -59,6 +77,7 @@ function registerIpcHandlers() {
     if (win && typeof partial.alwaysOnTop === 'boolean') {
       win.setAlwaysOnTop(partial.alwaysOnTop)
     }
+    applyRemoteSetting(saved)
     return saved
   })
 
@@ -210,6 +229,20 @@ $s.GetInstalledVoices() | ForEach-Object {
     win.setResizable(false)
   })
 
+  ipcMain.on('remote:state', (_e, state) => {
+    if (remoteServer && remoteServer.isRunning()) remoteServer.broadcastState(state)
+  })
+
+  ipcMain.handle('remote:info', async () => {
+    const running = !!(remoteServer && remoteServer.isRunning())
+    const url = running ? remoteServer.getUrl() : null
+    let qr = null
+    if (url) {
+      try { qr = await require('qrcode').toDataURL(url, { margin: 1, width: 220 }) } catch {}
+    }
+    return { running, url, qr }
+  })
+
   ipcMain.handle('fs:readFile', (_e, filePath) => {
     const ext = path.extname(filePath).toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(ext)) {
@@ -217,6 +250,8 @@ $s.GetInstalledVoices() | ForEach-Object {
     }
     return fs.readFileSync(filePath)
   })
+
+  applyRemoteSetting(getStore().get())
 }
 
 module.exports = { registerIpcHandlers }
