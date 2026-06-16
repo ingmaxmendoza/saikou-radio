@@ -232,6 +232,7 @@ async function runDJBreak() {
     getSettings: () => settings,
     getPlaylist: () => playlist,
     getNextTrack: () => {
+      if (requestQueue.length > 0) return playlist.tracks[requestQueue[0]] ?? null
       if (settings.shuffle && shuffleQueue.length > 0) {
         const nextPos = shufflePos + 1
         const nextIdx = nextPos < shuffleQueue.length ? shuffleQueue[nextPos] : shuffleQueue[0]
