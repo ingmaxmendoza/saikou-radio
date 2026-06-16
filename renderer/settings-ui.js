@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customThemePath  = document.getElementById('custom-theme-path');
   const browseCustomCss  = document.getElementById('browse-custom-css');
   const alwaysOnTop      = document.getElementById('always-on-top');
+  const remoteEnabled    = document.getElementById('remote-enabled');
+  const remotePort       = document.getElementById('remote-port');
   const saveBtn          = document.getElementById('save-btn');
   const cancelBtn        = document.getElementById('cancel-btn');
 
@@ -52,6 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   themeSelect.value         = settings.theme ?? 'y2k-silver';
   customThemePath.value     = settings.customThemePath ?? '';
   alwaysOnTop.checked       = !!settings.alwaysOnTop;
+  remoteEnabled.checked     = !!settings.remoteEnabled;
+  remotePort.value          = settings.remotePort ?? 7000;
 
   // ── Voice dropdown ────────────────────────────────────────────────────────
   async function populateVoices(engine, currentVoice) {
@@ -143,6 +147,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       theme:              themeSelect.value,
       customThemePath:    customThemePath.value,
       alwaysOnTop:        alwaysOnTop.checked,
+      remoteEnabled:      remoteEnabled.checked,
+      remotePort:         parseInt(remotePort.value, 10) || 7000,
     };
 
     await api.saveSettings(newSettings);

@@ -64,3 +64,8 @@ test('existing V1 defaults are untouched', () => {
   expect(DEFAULTS.fadeSeconds).toBe(2)
   expect(DEFAULTS.theme).toBe('y2k-silver')
 })
+
+test('Phase 2 remote defaults exist', () => {
+  expect(DEFAULTS.remoteEnabled).toBe(false)
+  expect(DEFAULTS.remotePort).toBe(7000)
+})

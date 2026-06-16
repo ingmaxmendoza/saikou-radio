@@ -186,7 +186,7 @@
       font-family: var(--font-ui);
       font-size: 10px;
     }
-    #mini-btn, #fullscreen-btn {
+    #mini-btn, #fullscreen-btn, #remote-btn {
       background: var(--btn-bg, #d0d0d8);
       color: var(--btn-text, #111);
       border: 2px solid var(--border-light, #fff);
@@ -314,6 +314,22 @@
       border-bottom-color: var(--border-light, #fff);
     }
 
+    #remote-overlay {
+      display: none; position: fixed; inset: 0; z-index: 50;
+      background: rgba(0,0,0,.6); align-items: center; justify-content: center;
+    }
+    #remote-overlay.show { display: flex; }
+    #remote-card {
+      background: var(--bg-secondary, #e4e4e8); color: var(--text-primary, #111);
+      border: 2px solid var(--border-dark, #888); border-radius: 6px; padding: 18px 22px;
+      text-align: center; font-family: var(--font-ui); max-width: 300px;
+    }
+    #remote-card h3 { font-size: 14px; margin-bottom: 10px; }
+    #remote-card img { width: 200px; height: 200px; background: #fff; image-rendering: pixelated; }
+    #remote-url { font-family: var(--font-mono, monospace); font-size: 13px; margin: 10px 0; word-break: break-all; }
+    #remote-msg { font-size: 11px; color: var(--text-secondary, #555); }
+    #remote-close { margin-top: 12px; padding: 4px 16px; cursor: pointer; font-family: var(--font-ui); }
+
     /* ── Master volume row ── */
     #volume-row { display: flex; align-items: center; gap: 8px; }
     #volume-row .vol-icon { font-size: 11px; color: var(--text-secondary, #555); letter-spacing: 1px; }
@@ -440,6 +456,7 @@
         <span class="dj-label" id="dj-status"></span>
       </div>
       <button id="settings-btn">Settings</button>
+      <button id="remote-btn" title="Phone remote">📱</button>
       <button id="fullscreen-btn" title="Fullscreen (F)">&#9974;</button>
       <button id="mini-btn" title="Mini player">_</button>
     </div>
@@ -462,6 +479,15 @@
       <input type="range" id="fs-volume" min="0" max="100" value="100">
       <button id="fs-cycle" title="Cycle visualizer (V)">VIZ</button>
       <button id="fs-exit" title="Exit (Esc)">&#9974;</button>
+    </div>
+  </div>
+  <div id="remote-overlay">
+    <div id="remote-card">
+      <h3>📱 Phone Remote</h3>
+      <img id="remote-qr" alt="" style="display:none">
+      <div id="remote-url"></div>
+      <div id="remote-msg"></div>
+      <button id="remote-close">Close</button>
     </div>
   </div>
   <script src="app.js"></script>
