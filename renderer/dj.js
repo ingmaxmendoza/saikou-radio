@@ -100,12 +100,13 @@ function currentTimeString() {
 }
 
 class DJEngine {
-  constructor({ playAudioBuffer, playJingle, synthesizeTTS, getSettings, getPlaylist, onError }) {
+  constructor({ playAudioBuffer, playJingle, synthesizeTTS, getSettings, getPlaylist, getNextTrack, onError }) {
     this._playAudioBuffer = playAudioBuffer
     this._playJingle = playJingle
     this._synthesizeTTS = synthesizeTTS
     this._getSettings = getSettings
     this._getPlaylist = getPlaylist
+    this._getNextTrack = getNextTrack || null
     this._onError = onError || null
   }
 
@@ -115,8 +116,9 @@ class DJEngine {
     const currentTrack = playlist.currentTrack()
 
     if (!currentTrack) return  // nothing to announce
-    const nextIndex = (playlist.currentIndex + 1) % playlist.tracks.length
-    const nextTrack = playlist.tracks[nextIndex] ?? null
+    const nextTrack = this._getNextTrack
+      ? this._getNextTrack()
+      : (playlist.tracks[(playlist.currentIndex + 1) % playlist.tracks.length] ?? null)
 
     if (settings.jinglesEnabled && settings.jinglesFolder) {
       try {
@@ -143,4 +145,4 @@ class DJEngine {
   }
 }
 
-module.exports = { DJEngine, buildDJScript, pickRandom, currentTimeString }
+module.exports = { DJEngine, buildDJScript, currentTimeString }
