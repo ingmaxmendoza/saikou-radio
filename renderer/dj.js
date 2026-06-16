@@ -51,13 +51,17 @@ function detectLang(voice) {
   return (voice || '').toLowerCase().startsWith('es-') ? 'es' : 'en'
 }
 
-function buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice) {
+function buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice, opts = {}) {
   const lang = detectLang(voice)
   const T = TEMPLATES[lang]
   const parts = []
 
   const heardFn = T.heard[Math.floor(Math.random() * T.heard.length)]
   parts.push(heardFn(currentTrack.title, currentTrack.artist))
+
+  if (opts.mentionPlaylist && opts.source) {
+    parts.push(lang === 'es' ? `De la lista ${opts.source}.` : `From the ${opts.source} playlist.`)
+  }
 
   if (nextTrack) {
     const nextFn = T.next[Math.floor(Math.random() * T.next.length)]
@@ -93,6 +97,11 @@ function pickPhrase(arr, lang) {
 function pickRandom(arr) {
   if (!arr || arr.length === 0) return ''
   return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function shouldMentionPlaylist(playlistCount, rand = Math.random) {
+  const threshold = playlistCount >= 2 ? 0.60 : 0.15
+  return rand() < threshold
 }
 
 function currentTimeString() {
@@ -134,7 +143,10 @@ class DJEngine {
       ? (settings.personalityPhrasesES || [])
       : (settings.personalityPhrases || [])
     const phrase = pickPhrase(phrases, lang)
-    const script = buildDJScript(currentTrack, nextTrack, currentTimeString(), phrase, settings.ttsVoice)
+    const source = currentTrack.source || ''
+    const playlistCount = new Set(playlist.tracks.map(t => t.source).filter(Boolean)).size
+    const mentionPlaylist = shouldMentionPlaylist(playlistCount)
+    const script = buildDJScript(currentTrack, nextTrack, currentTimeString(), phrase, settings.ttsVoice, { source, mentionPlaylist })
     if (this._onScript) this._onScript(script)
 
     try {
@@ -147,4 +159,4 @@ class DJEngine {
   }
 }
 
-module.exports = { DJEngine, buildDJScript, currentTimeString }
+module.exports = { DJEngine, buildDJScript, currentTimeString, shouldMentionPlaylist }
