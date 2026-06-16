@@ -32,7 +32,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 1.1.1 |
+| Version | 2.0.0-phase1 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -177,6 +177,8 @@ All handlers are registered in `main/ipc.js`.
 | `window:openSettings` | invoke | Creates (or focuses) the settings BrowserWindow |
 | `window:mini` | invoke | Resizes window to 480×100, pins to bottom corner, enables always-on-top |
 | `window:restore` | invoke | Restores window to 760×440, centers it, removes corner-snap listener |
+| `window:fullscreen` | invoke | Enters OS fullscreen mode |
+| `window:windowed` | invoke | Exits OS fullscreen mode, restores windowed state |
 
 ### File security (`fs:readFile`)
 
@@ -384,6 +386,86 @@ Handles actual speech synthesis in the main process.
 
 ---
 
+## Fullscreen & Visualizers (V2 Phase 1)
+
+### `renderer/visualizer.js` — VisualizerEngine
+
+Owns a `<canvas>` element and reads frequency/waveform data from an `AnalyserNode` supplied via a `getAnalyser` callback passed to the constructor.
+
+**Visualizer styles (4 total):**
+
+| Style | Description |
+|---|---|
+| `bars` | Classic frequency bar graph |
+| `scope` | Oscilloscope waveform |
+| `radial` | Radial/circular frequency display |
+| `particles` | Particle system driven by audio amplitude |
+
+**Color handling:** Colors are read live from the active theme's CSS custom properties (`--text-accent`, `--text-secondary`, `--bg-lcd`) via an internal `resolveThemeColor` helper that calls `getComputedStyle`. Colors are refreshed automatically when the theme changes.
+
+**Key methods:**
+
+| Method | Description |
+|---|---|
+| `start()` | Begins `requestAnimationFrame` render loop |
+| `stop()` | Cancels the animation loop |
+| `nextStyle()` | Cycles to the next visualizer style |
+| `setStyle(name)` | Sets a specific style by name |
+| `resize()` | Updates canvas dimensions to match its layout size |
+| `setArt(dataUrl)` | Passes current album art for use in ambient background rendering |
+
+### Audio Graph Changes (`renderer/audio.js`)
+
+The audio graph was extended in V2 Phase 1:
+
+```
+source → [mono] → fadeGain → masterGain → analyser → destination
+```
+
+- `fadeGain` — the former single gain node; still handles fade in/out
+- `masterGain` — new persistent master volume node; controlled via `setVolume(v)` / `getVolume()`; volume value is clamped by the exported `clampVolume` utility
+- `analyser` — persistent `AnalyserNode` (fftSize 2048) inserted between `masterGain` and destination; exposed via `getAnalyser()` for `VisualizerEngine`
+
+### Master Volume
+
+- Persisted as the `volume` setting (range 0–1, default 1)
+- Slider present in both the main player and the fullscreen bar
+- Applied via `applyVolume()` in `app.js` which calls `audio.setVolume()`
+
+### Fullscreen Mode
+
+Real OS fullscreen via new IPC channels `window:fullscreen` / `window:windowed` (preload: `setFullscreen(true/false)`). DOM block `#fullscreen` in `index.html` is shown when active.
+
+**Chrome auto-hide:** After ~3 seconds of no mouse movement in fullscreen, the class `body.chrome-hidden` is applied, hiding controls and cursor. Any mouse movement removes it.
+
+**Entry/exit:** `F` key, or the fullscreen button in the player; handled by `enterFullscreen()` / `exitFullscreen()` in `app.js`. `Esc` also exits.
+
+### Ambient Art Background & DJ Subtitles
+
+| Feature | Setting key | Default | Description |
+|---|---|---|---|
+| Ambient art background | `ambientArtBackground` | `true` | Blurred album art rendered behind the visualizer canvas |
+| DJ subtitles | `djSubtitles` | `true` | The spoken DJ line displayed large on-screen during a break, fed via the `DJEngine` `onScript` callback |
+
+### Keyboard Shortcuts (Fullscreen & Global)
+
+| Key | Action |
+|---|---|
+| `Space` | Play / Pause |
+| `Left` | Previous track |
+| `Right` | Next track |
+| `Up` | Volume up |
+| `Down` | Volume down |
+| `F` | Enter fullscreen |
+| `Esc` | Exit fullscreen |
+| `V` | Cycle visualizer style |
+
+### Visualizer Auto-Rotate
+
+Optional: the visualizer style can automatically cycle every N tracks. Controlled by `visualizerAutoRotate` (bool) and `visualizerRotateEvery` (integer, number of tracks between rotations).
+
+---
+
 ## Settings System
 
 ### `main/settings.js` — SettingsStore
@@ -409,6 +491,12 @@ Persists settings to `<userData>/settings.json`. `userData` is the Electron app 
 | `fadeSeconds` | `2` | Fade in/out duration in seconds |
 | `personalityPhrases` | (25 EN phrases) | English DJ personality phrases |
 | `personalityPhrasesES` | (20 ES phrases) | Spanish DJ personality phrases |
+| `volume` | `1` | Master volume (0–1) |
+| `visualizerStyle` | `'bars'` | Active visualizer style (`bars`, `scope`, `radial`, `particles`) |
+| `visualizerAutoRotate` | `false` | Auto-cycle visualizer style every N tracks |
+| `visualizerRotateEvery` | `3` | Number of tracks between auto-rotations |
+| `ambientArtBackground` | `true` | Show blurred album art behind the visualizer in fullscreen |
+| `djSubtitles` | `true` | Show DJ spoken line as subtitle overlay during a break |
 
 ### Settings Window
 
@@ -631,6 +719,8 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | 1.0.0 | Initial release |
 | 1.1.0 | Mini player, themes, seek slider, shuffle queue, codebase cleanup |
 | 1.1.1 | Batched metadata loading with live progress counter |
+| 1.1.2 | DJ announces correct next track in shuffle mode |
+| 2.0.0-phase1 | V2 Phase 1: fullscreen mode, VisualizerEngine (bars/scope/radial/particles), master volume, ambient art background, DJ subtitles, keyboard shortcuts |
 
 ---
 
