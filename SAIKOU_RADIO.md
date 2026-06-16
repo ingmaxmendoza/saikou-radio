@@ -34,7 +34,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 2.0.0-phase2 |
+| Version | 2.0.0 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -549,6 +549,43 @@ The `📱` button opens an overlay showing the LAN URL and a QR code (generated 
 
 ---
 
+## Timers (V2 Phase 3)
+
+### Pomodoro Timer (`renderer/pomodoro.js`)
+
+Pure state machine via `nextPomodoroPhase(current, completedFocus, longEvery)`: transitions focus → short/long break (based on `longEvery` interval) and break → focus. The `PomodoroTimer` class manages configuration, lifecycle, and state callbacks.
+
+**Core API:**
+
+| Method | Description |
+|---|---|
+| `configure({ focus, short, long, longEvery })` | Set phase durations (minutes) and long-break interval |
+| `start()` | Begin countdown; fires `onPhaseChange` on entry, `onTick` every second |
+| `pause()` | Suspend countdown; state persists |
+| `reset()` | Return to idle; clear completed focus count |
+| `skip()` | Advance to next phase immediately |
+| `getState()` | Return `{phase, kind, remaining, running, completedFocus}` |
+
+**Callbacks:** `onPhaseChange({phase, kind})` fires when entering a new phase; `onTick(state)` fires on every 1-second tick. On each phase change, the renderer announces a bilingual phrase (from settings based on `ttsVoice`) via the existing TTS pipeline (using `speech` method in app.js). The music resumes where it left off: the current file re-plays and seeks to the saved offset (because TTS playback overwrites the audio buffer). Empty phrase lists are handled gracefully (no announcement).
+
+### Sleep Timer
+
+`setSleep(minutes)` sets an end timestamp. The unified 1-second `onSecond` tick (in app.js) checks expiry and triggers `sleepFadeOutAndPause`: a 5-second volume fade from current level to 0, then pause. The saved volume is restored without persisting, so the next play resumes at normal level.
+
+### Desktop Timers UI
+
+The `⏱` button opens a timers overlay with controls:
+- **Sleep:** Off, 15, 30, 60, 90 minutes (live `#sleep-display` shows remaining time)
+- **Pomodoro:** Start, Pause, Skip, Reset buttons (live `#pomo-display` shows phase/remaining)
+
+### Phone Remote Timers
+
+A dedicated Timers section in the phone UI mirrors all desktop controls. Timer state rides the Phase-2 SSE channel: `sleep: {active, remaining}` and full `pomodoro.getState()` are included in both full state broadcasts and the ~1/sec tick updates. 
+
+**Remote commands added:** `sleep-set` (0=off), `pomo-start`, `pomo-pause`, `pomo-skip`, `pomo-reset`.
+
+---
+
 ## Settings System
 
 ### `main/settings.js` — SettingsStore
@@ -582,6 +619,14 @@ Persists settings to `<userData>/settings.json`. `userData` is the Electron app 
 | `djSubtitles` | `true` | Show DJ spoken line as subtitle overlay during a break |
 | `remoteEnabled` | `false` | Start LAN remote server |
 | `remotePort` | `7000` | LAN server port |
+| `pomodoroWork` | `25` | Focus phase duration (minutes) |
+| `pomodoroShortBreak` | `5` | Short break duration (minutes) |
+| `pomodoroLongBreak` | `15` | Long break duration (minutes) |
+| `pomodoroLongEvery` | `4` | Long break interval (every N focus blocks) |
+| `pomodoroFocusPhrases` | (5 EN phrases) | English focus-start announcements |
+| `pomodoroFocusPhrasesES` | (5 ES phrases) | Spanish focus-start announcements |
+| `pomodoroBreakPhrases` | (5 EN phrases) | English break-start announcements |
+| `pomodoroBreakPhrasesES` | (5 ES phrases) | Spanish break-start announcements |
 
 ### Settings Window
 
@@ -807,6 +852,7 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | 1.1.2 | DJ announces correct next track in shuffle mode |
 | 2.0.0-phase1 | V2 Phase 1: fullscreen mode, VisualizerEngine (bars/scope/radial/particles), master volume, ambient art background, DJ subtitles, keyboard shortcuts |
 | 2.0.0-phase2 | V2 Phase 2: LAN remote control from phone, request queue, QR connect panel |
+| 2.0.0 | V2 complete: sleep timer and Pomodoro timer with bilingual TTS announcements, desktop and phone UI controls |
 
 ---
 
