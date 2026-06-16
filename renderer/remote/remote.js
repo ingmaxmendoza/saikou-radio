@@ -1,4 +1,4 @@
-const state = { tracks: [], queue: [], title: '', artist: '', art: null, isPlaying: false, elapsed: 0, duration: 0, volume: 1, shuffle: false, currentIndex: -1 }
+const state = { tracks: [], queue: [], title: '', artist: '', art: null, isPlaying: false, elapsed: 0, duration: 0, volume: 1, shuffle: false, currentIndex: -1, sleep: { active: false, remaining: 0 }, pomodoro: { phase: 'idle' } }
 const $ = (id) => document.getElementById(id)
 let seekDragging = false
 
@@ -12,6 +12,15 @@ function post(action, extra) {
 
 function fmt(s) { s = Math.floor(s || 0); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') }
 
+function renderTimers() {
+  const s = state.sleep || { active: false, remaining: 0 }
+  document.getElementById('sleep-state').textContent = s.active ? fmt(s.remaining) : 'off'
+  const p = state.pomodoro || { phase: 'idle' }
+  const label = p.phase === 'idle' ? 'idle'
+    : (p.kind === 'focus' ? 'FOCUS' : (p.kind === 'long' ? 'LONG' : 'BREAK')) + ' ' + fmt(p.remaining || 0)
+  document.getElementById('pomo-state').textContent = label
+}
+
 function renderTick() {
   $('play').textContent = state.isPlaying ? '❚❚' : '▶'
   if (!seekDragging) {
@@ -21,6 +30,7 @@ function renderTick() {
   $('elapsed').textContent = fmt(state.elapsed)
   $('duration').textContent = fmt(state.duration)
   $('vol').value = Math.round((state.volume ?? 1) * 100)
+  renderTimers()
 }
 
 function renderPlaylist() {
@@ -68,7 +78,7 @@ function renderFull() {
   const art = $('art')
   if (state.art) { art.src = state.art; art.style.display = 'block' } else { art.style.display = 'none' }
   $('shuffle').classList.toggle('on', !!state.shuffle)
-  renderPlaylist(); renderQueue(); renderTick()
+  renderPlaylist(); renderQueue(); renderTick(); renderTimers()
 }
 
 function connect() {
@@ -90,5 +100,13 @@ $('djbreak').onclick = () => post('djbreak')
 $('vol').oninput = () => post('volume', { value: $('vol').value / 100 })
 $('seek').addEventListener('input', () => { seekDragging = true })
 $('seek').addEventListener('change', () => { seekDragging = false; post('seek', { value: $('seek').value / 1000 }) })
+
+document.querySelectorAll('#sleep-btns [data-sleep]').forEach((b) => {
+  b.onclick = () => post('sleep-set', { minutes: Number(b.getAttribute('data-sleep')) })
+})
+document.getElementById('p-start').onclick = () => post('pomo-start')
+document.getElementById('p-pause').onclick = () => post('pomo-pause')
+document.getElementById('p-skip').onclick  = () => post('pomo-skip')
+document.getElementById('p-reset').onclick = () => post('pomo-reset')
 
 connect()

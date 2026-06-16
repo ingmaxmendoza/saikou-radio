@@ -237,6 +237,43 @@
     </div>
   </div>
 
+  <!-- Pomodoro -->
+  <div class="section">
+    <div class="section-title">Pomodoro</div>
+    <div class="row">
+      <label for="pomo-work">Work (min)</label>
+      <input type="number" id="pomo-work" min="1" max="180" value="25" />
+    </div>
+    <div class="row">
+      <label for="pomo-short">Short Break (min)</label>
+      <input type="number" id="pomo-short" min="1" max="60" value="5" />
+    </div>
+    <div class="row">
+      <label for="pomo-long">Long Break (min)</label>
+      <input type="number" id="pomo-long" min="1" max="120" value="15" />
+    </div>
+    <div class="row">
+      <label for="pomo-every">Long Break Every</label>
+      <input type="number" id="pomo-every" min="1" max="12" value="4" />
+    </div>
+    <div class="row" style="align-items:flex-start;">
+      <label for="pomo-focus-en" style="padding-top:2px;">Focus Phrases (EN)</label>
+      <textarea id="pomo-focus-en" placeholder="One phrase per line…"></textarea>
+    </div>
+    <div class="row" style="align-items:flex-start;">
+      <label for="pomo-focus-es" style="padding-top:2px;">Focus Phrases (ES)</label>
+      <textarea id="pomo-focus-es" placeholder="Una frase por línea…"></textarea>
+    </div>
+    <div class="row" style="align-items:flex-start;">
+      <label for="pomo-break-en" style="padding-top:2px;">Break Phrases (EN)</label>
+      <textarea id="pomo-break-en" placeholder="One phrase per line…"></textarea>
+    </div>
+    <div class="row" style="align-items:flex-start;">
+      <label for="pomo-break-es" style="padding-top:2px;">Break Phrases (ES)</label>
+      <textarea id="pomo-break-es" placeholder="Una frase por línea…"></textarea>
+    </div>
+  </div>
+
   <!-- Footer -->
   <div class="footer">
     <button id="cancel-btn">Cancel</button>

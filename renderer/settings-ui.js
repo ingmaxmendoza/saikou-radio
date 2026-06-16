@@ -25,6 +25,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const alwaysOnTop      = document.getElementById('always-on-top');
   const remoteEnabled    = document.getElementById('remote-enabled');
   const remotePort       = document.getElementById('remote-port');
+  const pomoWork   = document.getElementById('pomo-work');
+  const pomoShort  = document.getElementById('pomo-short');
+  const pomoLong   = document.getElementById('pomo-long');
+  const pomoEvery  = document.getElementById('pomo-every');
+  const pomoFocusEn = document.getElementById('pomo-focus-en');
+  const pomoFocusEs = document.getElementById('pomo-focus-es');
+  const pomoBreakEn = document.getElementById('pomo-break-en');
+  const pomoBreakEs = document.getElementById('pomo-break-es');
   const saveBtn          = document.getElementById('save-btn');
   const cancelBtn        = document.getElementById('cancel-btn');
 
@@ -56,6 +64,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   alwaysOnTop.checked       = !!settings.alwaysOnTop;
   remoteEnabled.checked     = !!settings.remoteEnabled;
   remotePort.value          = settings.remotePort ?? 7000;
+  pomoWork.value  = settings.pomodoroWork ?? 25;
+  pomoShort.value = settings.pomodoroShortBreak ?? 5;
+  pomoLong.value  = settings.pomodoroLongBreak ?? 15;
+  pomoEvery.value = settings.pomodoroLongEvery ?? 4;
+  pomoFocusEn.value = (settings.pomodoroFocusPhrases ?? []).join('\n');
+  pomoFocusEs.value = (settings.pomodoroFocusPhrasesES ?? []).join('\n');
+  pomoBreakEn.value = (settings.pomodoroBreakPhrases ?? []).join('\n');
+  pomoBreakEs.value = (settings.pomodoroBreakPhrasesES ?? []).join('\n');
 
   // ── Voice dropdown ────────────────────────────────────────────────────────
   async function populateVoices(engine, currentVoice) {
@@ -149,6 +165,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       alwaysOnTop:        alwaysOnTop.checked,
       remoteEnabled:      remoteEnabled.checked,
       remotePort:         parseInt(remotePort.value, 10) || 7000,
+      pomodoroWork:           parseInt(pomoWork.value, 10) || 25,
+      pomodoroShortBreak:     parseInt(pomoShort.value, 10) || 5,
+      pomodoroLongBreak:      parseInt(pomoLong.value, 10) || 15,
+      pomodoroLongEvery:      parseInt(pomoEvery.value, 10) || 4,
+      pomodoroFocusPhrases:   pomoFocusEn.value.split('\n').map(l => l.trim()).filter(Boolean),
+      pomodoroFocusPhrasesES: pomoFocusEs.value.split('\n').map(l => l.trim()).filter(Boolean),
+      pomodoroBreakPhrases:   pomoBreakEn.value.split('\n').map(l => l.trim()).filter(Boolean),
+      pomodoroBreakPhrasesES: pomoBreakEs.value.split('\n').map(l => l.trim()).filter(Boolean),
     };
 
     await api.saveSettings(newSettings);
