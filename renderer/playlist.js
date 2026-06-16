@@ -7,11 +7,20 @@ class PlaylistManager {
     this._index = 0
   }
 
-  loadFromText(text, playlistPath) {
-    const dir = path.dirname(playlistPath).replace(/\\/g, '/')
-    const lines = text.split(/\r?\n/)
+  clear() {
     this.tracks = []
     this._index = 0
+  }
+
+  loadFromText(text, playlistPath) {
+    this.clear()
+    this.addFromText(text, playlistPath)
+  }
+
+  addFromText(text, playlistPath) {
+    const dir = path.dirname(playlistPath).replace(/\\/g, '/')
+    const source = path.basename(playlistPath, path.extname(playlistPath))
+    const lines = text.split(/\r?\n/)
 
     let pendingMeta = null
 
@@ -46,6 +55,7 @@ class PlaylistManager {
         artist: pendingMeta?.artist ?? '',
         duration: pendingMeta?.duration ?? 0,
         error: false,
+        source,
       })
       pendingMeta = null
     }
