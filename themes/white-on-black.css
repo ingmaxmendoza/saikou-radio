@@ -1,0 +1,73 @@
+/* themes/white-on-black.css */
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #111111;
+  --bg-panel: #0a0a0a;
+  --bg-lcd: #000000;
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-accent: #ffffff;
+  --border-light: #555555;
+  --border-dark: #333333;
+  --btn-bg: #1a1a1a;
+  --btn-text: #ffffff;
+  --font-ui: 'Courier New', monospace;
+  --font-mono: 'Courier New', monospace;
+}
+
+body { background: #000000; color: #ffffff; }
+
+#titlebar {
+  background: #000000;
+  border-bottom: 1px solid #ffffff;
+}
+#titlebar .logo { color: #ffffff; letter-spacing: 4px; }
+#titlebar .clock { color: #aaaaaa; }
+
+#lcd {
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+}
+#lcd .track-title { color: #ffffff; }
+#lcd .track-meta { color: #aaaaaa !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #ffffff 0%, #ffffff var(--seek-pct,0%), #333333 var(--seek-pct,0%), #333333 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #ffffff !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+.ctrl-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+  border-right-color: #333333 !important;
+  border-bottom-color: #333333 !important;
+}
+.ctrl-btn:hover { border-color: #ffffff !important; }
+.ctrl-btn.active {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+#open-btn, #settings-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+}
+#open-btn:hover, #settings-btn:hover { border-color: #ffffff !important; }
+
+#playlist-panel { background: #000000; border-left: 1px solid #333333; }
+#playlist-panel .pl-header { color: #555555; }
+.pl-track { color: #aaaaaa; }
+.pl-track:hover { background: #1a1a1a; color: #ffffff; }
+.pl-track.active { color: #ffffff; font-weight: bold; }
+
+#dj-panel { background: #000000; border-top: 1px solid #333333; }
+#dj-panel .dj-label { color: #555555; }
+#dj-panel .dj-value { color: #ffffff; }
