@@ -173,7 +173,7 @@ async function playTrackAt(index) {
     syncMiniPlay()
     if (isFullscreen && settings.visualizerAutoRotate && visualizer) {
       rotateCounter++
-      if (rotateCounter >= (settings.visualizerRotateEvery || 3)) { rotateCounter = 0; visualizer.nextStyle() }
+      if (rotateCounter >= (settings.visualizerRotateEvery || 3)) { rotateCounter = 0; cycleVisualizer() }
     }
   } catch (err) {
     console.error('playTrackAt error:', err)
@@ -266,6 +266,13 @@ function toggleFullscreen() { isFullscreen ? exitFullscreen() : enterFullscreen(
 
 function showSubtitle(text) { if (fsSubtitle) { fsSubtitle.textContent = text; fsSubtitle.classList.add('visible') } }
 function hideSubtitle() { if (fsSubtitle) fsSubtitle.classList.remove('visible') }
+
+function cycleVisualizer() {
+  if (!visualizer) return
+  const style = visualizer.nextStyle()
+  settings.visualizerStyle = style
+  window.saikouAPI.saveSettings({ visualizerStyle: style })
+}
 
 audio.onTrackEnd(async () => {
   if (breakPending) {
@@ -433,7 +440,7 @@ $('fs-exit').onclick = exitFullscreen
 $('fs-prev').onclick = () => $('btn-prev').click()
 $('fs-play').onclick = () => btnPlay.click()
 $('fs-next').onclick = () => $('btn-next').click()
-$('fs-cycle').onclick = () => { if (visualizer) visualizer.nextStyle() }
+$('fs-cycle').onclick = cycleVisualizer
 
 document.addEventListener('mousemove', () => { if (isFullscreen) armChromeHide() })
 window.addEventListener('resize', () => { if (visualizer) visualizer.resize() })
@@ -448,7 +455,7 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowDown':  e.preventDefault(); applyVolume(audio.getVolume() - 0.05, true); break
     case 'f': case 'F': toggleFullscreen(); break
     case 'Escape':     exitFullscreen(); break
-    case 'v': case 'V': if (isFullscreen && visualizer) visualizer.nextStyle(); break
+    case 'v': case 'V': if (isFullscreen) cycleVisualizer(); break
   }
 })
 
