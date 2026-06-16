@@ -507,6 +507,23 @@ btnShuffle.onclick = () => {
 }
 
 $('fullscreen-btn').onclick = toggleFullscreen
+$('remote-btn').onclick = async () => {
+  const info = await window.saikouAPI.getRemoteInfo()
+  const overlay = $('remote-overlay')
+  const qr = $('remote-qr'), urlEl = $('remote-url'), msg = $('remote-msg')
+  if (info && info.running) {
+    urlEl.textContent = info.url
+    if (info.qr) { qr.src = info.qr; qr.style.display = 'block' } else { qr.style.display = 'none' }
+    msg.textContent = 'Open this address on a device on the same Wi‑Fi.'
+  } else {
+    urlEl.textContent = ''
+    qr.style.display = 'none'
+    msg.textContent = 'Remote is off. Enable it in Settings → Remote (LAN).'
+  }
+  overlay.classList.add('show')
+}
+$('remote-close').onclick = () => $('remote-overlay').classList.remove('show')
+$('remote-overlay').onclick = (e) => { if (e.target === $('remote-overlay')) $('remote-overlay').classList.remove('show') }
 $('fs-exit').onclick = exitFullscreen
 $('fs-prev').onclick = () => $('btn-prev').click()
 $('fs-play').onclick = () => btnPlay.click()
