@@ -49,11 +49,12 @@ const DEFAULTS = {
   ],
   pomodoroBreakPhrasesES: [
     "Tiempo de descanso, relájate.",
-    "Levántate, estírate, respira.",
+    "Levántata, estírate, respira.",
     "Tómate cinco. Te lo ganaste.",
     "Descansa, has estado trabajando duro.",
     "Pausa corta. Recarga energías.",
   ],
+  playlistFolder: '',
   personalityPhrasesES: [
     "Sigue sintonizado, esto es Saikou Radio.",
     "Mantenemos el flow toda la noche.",

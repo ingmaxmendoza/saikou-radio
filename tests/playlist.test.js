@@ -59,3 +59,29 @@ test('currentTrack and advance', () => {
   pm.advance() // wraps when loop=true
   expect(pm.currentTrack().path).toBe('C:/a.mp3')
 })
+
+test('addFromText appends and tags source (basename without extension)', () => {
+  const pm = new PlaylistManager()
+  pm.addFromText('#EXTM3U\nC:/music/a.mp3\n', 'C:/lists/chill.m3u')
+  pm.addFromText('C:/music/b.mp3\n', 'C:/lists/hype.m3u8')
+  expect(pm.tracks.length).toBe(2)
+  expect(pm.tracks[0].source).toBe('chill')
+  expect(pm.tracks[1].source).toBe('hype')
+})
+
+test('clear empties tracks and resets index', () => {
+  const pm = new PlaylistManager()
+  pm.addFromText('C:/m/a.mp3\n', 'C:/l/x.m3u')
+  pm.jumpTo(0)
+  pm.clear()
+  expect(pm.tracks.length).toBe(0)
+  expect(pm.currentIndex).toBe(0)
+})
+
+test('loadFromText replaces existing tracks', () => {
+  const pm = new PlaylistManager()
+  pm.addFromText('C:/m/a.mp3\n', 'C:/l/x.m3u')
+  pm.loadFromText('C:/m/b.mp3\n', 'C:/l/y.m3u')
+  expect(pm.tracks.length).toBe(1)
+  expect(pm.tracks[0].source).toBe('y')
+})

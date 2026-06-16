@@ -104,6 +104,27 @@ function registerIpcHandlers() {
     return result.canceled ? null : result.filePaths[0]
   })
 
+  ipcMain.handle('dialog:openPlaylists', async () => {
+    const win = getMainWindow()
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Playlist', extensions: ['m3u', 'm3u8'] }],
+    })
+    return result.canceled ? [] : result.filePaths
+  })
+
+  ipcMain.handle('library:list', () => {
+    const folder = getStore().get().playlistFolder
+    if (!folder) return []
+    try {
+      return fs.readdirSync(folder)
+        .filter(f => /\.(m3u|m3u8)$/i.test(f))
+        .map(f => ({ name: f.replace(/\.(m3u|m3u8)$/i, ''), path: path.join(folder, f) }))
+    } catch {
+      return []
+    }
+  })
+
   ipcMain.handle('tts:listVoices', async (_e, engine) => {
     if (engine === 'sapi') {
       const { execSync } = require('child_process')

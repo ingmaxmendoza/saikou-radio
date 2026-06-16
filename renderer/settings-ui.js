@@ -33,6 +33,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const pomoFocusEs = document.getElementById('pomo-focus-es');
   const pomoBreakEn = document.getElementById('pomo-break-en');
   const pomoBreakEs = document.getElementById('pomo-break-es');
+  const playlistFolder = document.getElementById('playlist-folder');
+  const browsePlaylistFolder = document.getElementById('browse-playlist-folder');
   const saveBtn          = document.getElementById('save-btn');
   const cancelBtn        = document.getElementById('cancel-btn');
 
@@ -72,6 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   pomoFocusEs.value = (settings.pomodoroFocusPhrasesES ?? []).join('\n');
   pomoBreakEn.value = (settings.pomodoroBreakPhrases ?? []).join('\n');
   pomoBreakEs.value = (settings.pomodoroBreakPhrasesES ?? []).join('\n');
+  playlistFolder.value = settings.playlistFolder ?? '';
 
   // ── Voice dropdown ────────────────────────────────────────────────────────
   async function populateVoices(engine, currentVoice) {
@@ -133,6 +136,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (folder) jinglesFolder.value = folder;
   });
 
+  browsePlaylistFolder.addEventListener('click', async () => {
+    const folder = await api.openFolderDialog();
+    if (folder) playlistFolder.value = folder;
+  });
+
   browseCustomCss.addEventListener('click', async () => {
     const file = await api.openFileDialog({
       filters: [{ name: 'CSS Files', extensions: ['css'] }],
@@ -173,6 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       pomodoroFocusPhrasesES: pomoFocusEs.value.split('\n').map(l => l.trim()).filter(Boolean),
       pomodoroBreakPhrases:   pomoBreakEn.value.split('\n').map(l => l.trim()).filter(Boolean),
       pomodoroBreakPhrasesES: pomoBreakEs.value.split('\n').map(l => l.trim()).filter(Boolean),
+      playlistFolder:     playlistFolder.value,
     };
 
     await api.saveSettings(newSettings);

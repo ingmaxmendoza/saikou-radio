@@ -24,8 +24,9 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 16. [Shuffle System](#shuffle-system)
 17. [Metadata Loading](#metadata-loading)
 18. [Build & Packaging](#build--packaging)
-19. [Dependencies](#dependencies)
-20. [Known Quirks](#known-quirks)
+19. [Multi-Playlist, Library & Smarter DJ (V2.1)](#multi-playlist-library--smarter-dj-v21)
+20. [Dependencies](#dependencies)
+21. [Known Quirks](#known-quirks)
 
 ---
 
@@ -34,7 +35,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 2.0.0 |
+| Version | 2.1.0 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -583,6 +584,62 @@ The `⏱` button opens a timers overlay with controls:
 A dedicated Timers section in the phone UI mirrors all desktop controls. Timer state rides the Phase-2 SSE channel: `sleep: {active, remaining}` and full `pomodoro.getState()` are included in both full state broadcasts and the ~1/sec tick updates. 
 
 **Remote commands added:** `sleep-set` (0=off), `pomo-start`, `pomo-pause`, `pomo-skip`, `pomo-reset`.
+
+---
+
+## Multi-Playlist, Library & Smarter DJ (V2.1)
+
+### PlaylistManager Multi-Playlist API
+
+`PlaylistManager` now supports three core methods for handling multiple playlists:
+
+- **`addFromText(text, path)`** — Appends tracks from an M3U/M3U8 file. Each track is tagged with a `source` property set to the m3u filename (without extension).
+- **`clear()`** — Empties the playlist.
+- **`loadFromText(text, path)`** — Clears the playlist, then adds tracks (equivalent to `clear()` + `addFromText()`).
+
+### Multiple Playlists UI
+
+Open Playlist is now **multi-select**: clicking multiple .m3u/.m3u8 files appends them into a single combined track list. A new **✕ Clear** button empties everything.
+
+The playlist sidebar displays tracks grouped under per-source headers (CSS class `.pl-group`) in normal load order. In shuffle mode, the sidebar remains flat (no grouping), while the shuffle queue remains functional.
+
+### Library Feature
+
+A new **📚 Library** button (in Settings → Library section) lets you browse to a folder and remember it as `playlistFolder` setting. The panel lists every .m3u/.m3u8 file in that folder; clicking one loads it (appends to the current playlist).
+
+**IPC support:**
+- `library:list` (invoke) — Returns an array of `{name, path}` objects for all playlists in the remembered folder.
+
+### Smarter DJ Announcements
+
+**Real next-track awareness:** `getNextTrack()` now returns the queued track (`requestQueue[0]`) when a request is pending, so the DJ announces the actual upcoming song.
+
+**Playlist source naming:** `buildDJScript(..., { source, mentionPlaylist })` adds a playlist attribution line:
+- English: "From the [name] playlist."
+- Spanish: "De la lista [name]."
+
+**Frequency control:** The pure helper `shouldMentionPlaylist(count)` controls mention frequency:
+- With 1 playlist loaded: ~15% chance
+- With 2+ playlists loaded: ~60% chance
+
+### Settings & IPC Updates
+
+**New settings row:**
+- `playlistFolder` (string, default `''`) — Path to the remembered library folder.
+
+**New IPC channels:**
+- `dialog:openPlaylists` (invoke, multi-select) — Opens a native file picker; returns an array of selected file paths.
+- `library:list` (invoke) — Returns `[{name, path}, ...]` for all .m3u/.m3u8 files in `playlistFolder`.
+
+### Shared Load Logic (`app.js`)
+
+A new `loadPlaylists(paths, {append})` function in the renderer handles:
+1. Reading each M3U/M3U8 file
+2. Parsing and merging into the combined playlist
+3. Loading metadata (only for tracks not already loaded)
+4. Rebuilding the shuffle queue (if enabled)
+5. Starting the DJ scheduler
+6. Starting playback from the first track
 
 ---
 
