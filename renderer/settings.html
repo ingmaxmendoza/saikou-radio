@@ -220,6 +220,23 @@
     </div>
   </div>
 
+  <!-- Remote -->
+  <div class="section">
+    <div class="section-title">Remote (LAN)</div>
+    <div class="row">
+      <label for="remote-enabled">Enable Remote</label>
+      <input type="checkbox" id="remote-enabled" />
+    </div>
+    <div class="row">
+      <label for="remote-port">Port</label>
+      <input type="number" id="remote-port" min="1024" max="65535" value="7000" />
+    </div>
+    <div class="row">
+      <label>&nbsp;</label>
+      <span style="flex:1;font-size:10px;color:var(--text-secondary,#666)">Anyone on your Wi&#8209;Fi can control playback. Connect from the Remote button in the player.</span>
+    </div>
+  </div>
+
   <!-- Footer -->
   <div class="footer">
     <button id="cancel-btn">Cancel</button>
