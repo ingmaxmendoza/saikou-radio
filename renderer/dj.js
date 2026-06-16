@@ -1,102 +1,87 @@
 // renderer/dj.js
 
-const TEMPLATES = {
-  en: {
-    heard: [
-      (t, a) => a ? `You just heard ${t} by ${a}.` : `You just heard ${t}.`,
-      (t, a) => a ? `That was ${t} from ${a}.` : `That was ${t}.`,
-      (t, a) => a ? `${a} with ${t} — hope you enjoyed that one.` : `That was ${t} — hope you enjoyed it.`,
-      (t, a) => a ? `Fresh off the playlist, ${t} by ${a}.` : `That one was ${t}.`,
-      (t, a) => a ? `${t} by ${a}, doing what it does.` : `${t}, right there.`,
-    ],
-    next: [
-      (t, a) => a ? `Coming up next: ${t} by ${a}.` : `Coming up next: ${t}.`,
-      (t, a) => a ? `Next up, ${a} with ${t}.` : `Next up, ${t}.`,
-      (t, a) => a ? `Stick around for ${t} by ${a}.` : `Stick around for ${t}.`,
-      (t, a) => a ? `Up next — ${t} from ${a}.` : `And then we've got ${t} coming your way.`,
-    ],
-    time: [
-      (s) => `It's ${s}.`,
-      (s) => `Clock's showing ${s}.`,
-      (s) => `The time right now is ${s}.`,
-      (s) => `${s} on the dot.`,
-    ],
-    sign: `You're listening to Saikou Radio.`,
-  },
-  es: {
-    heard: [
-      (t, a) => a ? `Acabas de escuchar ${t} de ${a}.` : `Acabas de escuchar ${t}.`,
-      (t, a) => a ? `Eso fue ${t} de ${a}.` : `Eso fue ${t}.`,
-      (t, a) => a ? `${a} con ${t} — espero que lo hayas disfrutado.` : `Eso fue ${t} — esperamos que te haya gustado.`,
-      (t, a) => a ? `Directo del playlist, ${t} de ${a}.` : `Esa fue ${t}.`,
-      (t, a) => a ? `${t} de ${a}, haciendo lo suyo.` : `${t}, ahí tienen.`,
-    ],
-    next: [
-      (t, a) => a ? `A continuación: ${t} de ${a}.` : `A continuación: ${t}.`,
-      (t, a) => a ? `Lo que sigue, ${a} con ${t}.` : `Lo que sigue, ${t}.`,
-      (t, a) => a ? `Quédate para ${t} de ${a}.` : `Quédate para ${t}.`,
-      (t, a) => a ? `Lo próximo — ${t} de ${a}.` : `Y luego les traemos ${t}.`,
-    ],
-    time: [
-      (s) => `Son las ${s}.`,
-      (s) => `El reloj marca las ${s}.`,
-      (s) => `En este momento son las ${s}.`,
-      (s) => `Las ${s} en punto.`,
-    ],
-    sign: `Estás escuchando Saikou Radio.`,
-  },
-}
+const {
+  getStructuralDecks,
+  getPersonalityDeck,
+  pickQuip,
+  drawTimeLine,
+} = require('./dj-content')
 
 function detectLang(voice) {
   return (voice || '').toLowerCase().startsWith('es-') ? 'es' : 'en'
 }
 
+// Pure-ish assembler: given the personality phrase (and optional bonus line),
+// draws the structural lines from the no-repeat decks and joins everything in
+// order. Every break ends on a Saikou Radio sign-off.
+//
+// opts: { source, mentionPlaylist, bonus, hour, rng }
 function buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice, opts = {}) {
   const lang = detectLang(voice)
-  const T = TEMPLATES[lang]
+  const decks = getStructuralDecks(lang)
+  const rng = opts.rng || Math.random
+  const hour = (opts.hour != null) ? opts.hour : new Date().getHours()
   const parts = []
 
-  const heardFn = T.heard[Math.floor(Math.random() * T.heard.length)]
-  parts.push(heardFn(currentTrack.title, currentTrack.artist))
+  parts.push(decks.heard.draw()(currentTrack.title, currentTrack.artist))
 
-  if (opts.mentionPlaylist && opts.source) {
-    parts.push(lang === 'es' ? `De la lista ${opts.source}.` : `From the ${opts.source} playlist.`)
+  // Strip the ";3" emoticon from spoken playlist names so the TTS doesn't read
+  // it aloud. Display elsewhere (e.g. the sidebar) keeps the original name.
+  const spokenSource = (opts.source || '').replace(/;3/g, '').replace(/\s+/g, ' ').trim()
+  if (opts.mentionPlaylist && spokenSource) {
+    parts.push(lang === 'es' ? `De la lista ${spokenSource}.` : `From the ${spokenSource} playlist.`)
   }
 
   if (nextTrack) {
-    const nextFn = T.next[Math.floor(Math.random() * T.next.length)]
-    parts.push(nextFn(nextTrack.title, nextTrack.artist))
+    parts.push(decks.next.draw()(nextTrack.title, nextTrack.artist))
   }
 
-  const timeFn = T.time[Math.floor(Math.random() * T.time.length)]
-  parts.push(timeFn(timeStr))
+  parts.push(drawTimeLine(lang, timeStr, hour, rng))
 
   if (phrase) parts.push(phrase)
-  parts.push(T.sign)
+  if (opts.bonus) parts.push(opts.bonus)
+
+  parts.push(decks.signoff.draw())
 
   return parts.join(' ')
 }
 
-const PHRASE_HISTORY_SIZE = 5
-const _phraseHistory = { en: [], es: [] }
+// Orchestrates a full break: draws the personality phrase (with any user-added
+// phrases layered in), decides whether to drop a bonus quip or fact, then builds
+// the script. Bonus flavor fires ~35% of breaks, weighted toward time/personality
+// quips (~70%) over trivia (~30%).
+function composeBreak(args) {
+  const {
+    currentTrack,
+    nextTrack,
+    timeStr,
+    voice,
+    settings = {},
+    source = '',
+    playlistCount = 0,
+  } = args
+  const now = args.now || new Date()
+  const rng = args.rng || Math.random
+  const lang = detectLang(voice)
 
-function pickPhrase(arr, lang) {
-  if (!arr || arr.length === 0) return ''
-  const history = _phraseHistory[lang] || []
-  // Filter out recently used phrases; fall back to full list if all were used recently
-  const available = arr.filter(p => !history.includes(p))
-  const pool = available.length > 0 ? available : arr
-  const picked = pool[Math.floor(Math.random() * pool.length)]
-  // Record and trim history
-  history.push(picked)
-  if (history.length > PHRASE_HISTORY_SIZE) history.shift()
-  _phraseHistory[lang] = history
-  return picked
-}
+  const extra = lang === 'es'
+    ? (settings.personalityPhrasesES || [])
+    : (settings.personalityPhrases || [])
+  const phrase = getPersonalityDeck(lang, extra).draw()
 
-function pickRandom(arr) {
-  if (!arr || arr.length === 0) return ''
-  return arr[Math.floor(Math.random() * arr.length)]
+  const mentionPlaylist = shouldMentionPlaylist(playlistCount, rng)
+  const hour = now.getHours()
+
+  let bonus = ''
+  if (rng() < 0.35) {
+    bonus = rng() < 0.70
+      ? pickQuip(lang, hour, rng)
+      : getStructuralDecks(lang).facts.draw()
+  }
+
+  return buildDJScript(currentTrack, nextTrack, timeStr, phrase, voice, {
+    source, mentionPlaylist, bonus, hour, rng,
+  })
 }
 
 function shouldMentionPlaylist(playlistCount, rand = Math.random) {
@@ -138,15 +123,17 @@ class DJEngine {
       }
     }
 
-    const lang = detectLang(settings.ttsVoice)
-    const phrases = lang === 'es'
-      ? (settings.personalityPhrasesES || [])
-      : (settings.personalityPhrases || [])
-    const phrase = pickPhrase(phrases, lang)
     const source = currentTrack.source || ''
     const playlistCount = new Set(playlist.tracks.map(t => t.source).filter(Boolean)).size
-    const mentionPlaylist = shouldMentionPlaylist(playlistCount)
-    const script = buildDJScript(currentTrack, nextTrack, currentTimeString(), phrase, settings.ttsVoice, { source, mentionPlaylist })
+    const script = composeBreak({
+      currentTrack,
+      nextTrack,
+      timeStr: currentTimeString(),
+      voice: settings.ttsVoice,
+      settings,
+      source,
+      playlistCount,
+    })
     if (this._onScript) this._onScript(script)
 
     try {
@@ -159,4 +146,4 @@ class DJEngine {
   }
 }
 
-module.exports = { DJEngine, buildDJScript, currentTimeString, shouldMentionPlaylist }
+module.exports = { DJEngine, buildDJScript, composeBreak, currentTimeString, shouldMentionPlaylist }
