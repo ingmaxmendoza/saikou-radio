@@ -148,11 +148,12 @@ function showAlbumArt(track) {
   }
   if (visualizer) visualizer.setArt(pic || null)
   if (fsAmbient) {
-    if (pic && settings.ambientArtBackground) {
+    if (pic && settings.ambientArtBackground !== false) {
       fsAmbient.src = pic
       fsAmbient.classList.add('visible')
     } else {
       fsAmbient.classList.remove('visible')
+      fsAmbient.src = ''
     }
   }
 }
@@ -244,6 +245,7 @@ function armChromeHide() {
 async function enterFullscreen() {
   if (isFullscreen) return
   isFullscreen = true
+  rotateCounter = 0
   document.body.classList.add('fullscreen')
   await window.saikouAPI.setFullscreen(true)
   syncFullscreenInfo()
