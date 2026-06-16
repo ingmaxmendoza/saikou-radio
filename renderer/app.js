@@ -5,6 +5,7 @@ const { BreakScheduler } = require('./scheduler')
 const { DJEngine } = require('./dj')
 const { ThemeEngine } = require('./theme')
 const { VisualizerEngine } = require('./visualizer')
+const { nextFromQueue } = require('./remote-queue')
 const fs = require('fs')
 const path = require('path')
 
@@ -22,6 +23,8 @@ let visualizer = null
 let isFullscreen = false
 let chromeTimer = null
 let rotateCounter = 0
+let requestQueue = []
+let lastElapsed = 0
 
 // --- DOM refs ---
 const $ = (id) => document.getElementById(id)
@@ -51,6 +54,7 @@ function applyVolume(v, persist) {
     settings.volume = vol
     window.saikouAPI.saveSettings({ volume: vol })
   }
+  pushRemoteTick()
 }
 
 if (volumeSlider) volumeSlider.addEventListener('input', () => applyVolume(volumeSlider.value / 100, true))
@@ -134,6 +138,7 @@ function updateNowPlaying() {
   renderPlaylist()
   syncMiniTrack()
   if (isFullscreen) syncFullscreenInfo()
+  pushRemoteState()
 }
 
 // --- Metadata ---
@@ -185,6 +190,12 @@ async function playTrackAt(index) {
 }
 
 async function playNext() {
+  if (requestQueue.length > 0) {
+    const idx = nextFromQueue(requestQueue)
+    if (settings.shuffle) shufflePos = shuffleQueue.indexOf(idx)
+    await playTrackAt(idx)
+    return
+  }
   if (settings.shuffle && playlist.tracks.length > 1) {
     shufflePos++
     if (shufflePos >= shuffleQueue.length) {
@@ -274,6 +285,61 @@ function cycleVisualizer() {
   window.saikouAPI.saveSettings({ visualizerStyle: style })
 }
 
+function buildRemoteState() {
+  const t = playlist.currentTrack()
+  const order = (settings.shuffle && shuffleQueue.length === playlist.tracks.length)
+    ? shuffleQueue
+    : playlist.tracks.map((_, i) => i)
+  return {
+    type: 'state',
+    title: t ? (t.title || 'Unknown') : 'No track',
+    artist: t ? (t.artist || '') : '',
+    art: t && t._picture ? t._picture : null,
+    isPlaying,
+    elapsed: lastElapsed,
+    duration: audio._duration || 0,
+    volume: audio.getVolume(),
+    shuffle: !!settings.shuffle,
+    currentIndex: playlist.currentIndex,
+    tracks: order.map(i => ({ index: i, title: playlist.tracks[i].title, artist: playlist.tracks[i].artist })),
+    queue: requestQueue.slice(),
+  }
+}
+function buildRemoteTick() {
+  return { type: 'tick', isPlaying, elapsed: lastElapsed, duration: audio._duration || 0, volume: audio.getVolume() }
+}
+function pushRemoteState() { window.saikouAPI.sendRemoteState(buildRemoteState()) }
+function pushRemoteTick()  { window.saikouAPI.sendRemoteState(buildRemoteTick()) }
+
+function handleRemoteCommand(cmd) {
+  switch (cmd.action) {
+    case 'toggle': btnPlay.click(); break
+    case 'play':   if (!isPlaying) btnPlay.click(); break
+    case 'pause':  if (isPlaying) btnPlay.click(); break
+    case 'next':   $('btn-next').click(); break
+    case 'prev':   $('btn-prev').click(); break
+    case 'shuffle': btnShuffle.click(); break
+    case 'seek':   if (typeof cmd.value === 'number') audio.seekTo(cmd.value * (audio._duration || 0)); break
+    case 'volume': if (typeof cmd.value === 'number') applyVolume(cmd.value, true); break
+    case 'play-index':
+      if (Number.isInteger(cmd.index) && playlist.tracks[cmd.index]) {
+        if (settings.shuffle) shufflePos = shuffleQueue.indexOf(cmd.index)
+        playTrackAt(cmd.index)
+      }
+      break
+    case 'djbreak':
+      if (playlist.tracks.length) { breakPending = true; $('btn-next').click() }
+      break
+    case 'queue-add':
+      if (Number.isInteger(cmd.index) && playlist.tracks[cmd.index]) { requestQueue.push(cmd.index); pushRemoteState() }
+      break
+    case 'queue-remove':
+      if (Number.isInteger(cmd.index)) { const p = requestQueue.indexOf(cmd.index); if (p >= 0) requestQueue.splice(p, 1); pushRemoteState() }
+      break
+  }
+  pushRemoteState()
+}
+
 audio.onTrackEnd(async () => {
   if (breakPending) {
     await runDJBreak()
@@ -290,6 +356,7 @@ function formatTime(secs) {
 }
 
 audio.onTimeUpdate((elapsed, duration) => {
+  lastElapsed = elapsed
   if (duration > 0) {
     const pct = (elapsed / duration) * 100
     if (!seekDragging) {
@@ -344,11 +411,13 @@ btnPlay.onclick = async () => {
     isPlaying = false
     btnPlay.textContent = '>'
     syncMiniPlay()
+    pushRemoteState()
   } else {
     await audio.resume()
     isPlaying = true
     btnPlay.textContent = '||'
     syncMiniPlay()
+    pushRemoteState()
   }
 }
 
@@ -371,6 +440,7 @@ $('open-btn').onclick = async () => {
     const text = new TextDecoder().decode(buf)
     playlist.loadFromText(text, filePath)
     failedTracks.clear()
+    requestQueue = []
     renderPlaylist()
     if (playlist.tracks.length === 0) {
       djStatus.textContent = 'No tracks found in playlist.'
@@ -433,6 +503,7 @@ btnShuffle.onclick = () => {
     buildShuffleQueue(playlist.currentIndex)
   }
   renderPlaylist()
+  pushRemoteState()
 }
 
 $('fullscreen-btn').onclick = toggleFullscreen
@@ -506,6 +577,10 @@ $('mini-expand').onclick = async () => {
 }
 
 
+
+// --- Remote control ---
+window.saikouAPI.onRemoteCommand(handleRemoteCommand)
+setInterval(() => pushRemoteTick(), 1000)
 
 // --- Init ---
 loadSettings()
