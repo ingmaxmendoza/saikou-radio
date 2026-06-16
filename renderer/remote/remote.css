@@ -29,3 +29,10 @@ body { background: #0d0d18; color: #e8f4f8; font-family: -apple-system, system-u
 .qtr .name { flex: 1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qtr .rm { width: 30px; height: 30px; border: none; border-radius: 6px; background: #24403a; color: #8fe6c8; cursor: pointer; }
 .hidden { display: none; }
+#timers { background: #101a2c; border-radius: 10px; padding: 12px; }
+#timers .trow { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 6px; }
+#timers .tlabel { font-size: 13px; color: #8fb6c8; text-transform: uppercase; letter-spacing: 1px; }
+#timers .tstate { font-family: monospace; font-size: 14px; color: #2fe6ff; }
+#timers .tbtns { display: flex; gap: 6px; flex-wrap: wrap; }
+#timers .tbtns button { flex: 1; min-width: 48px; padding: 10px 0; border: none; border-radius: 8px; background: #18283f; color: #e8f4f8; font-size: 13px; font-weight: 700; cursor: pointer; }
+#timers .tbtns button:active { filter: brightness(1.3); }
