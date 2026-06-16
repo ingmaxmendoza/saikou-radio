@@ -100,7 +100,7 @@ function currentTimeString() {
 }
 
 class DJEngine {
-  constructor({ playAudioBuffer, playJingle, synthesizeTTS, getSettings, getPlaylist, getNextTrack, onError }) {
+  constructor({ playAudioBuffer, playJingle, synthesizeTTS, getSettings, getPlaylist, getNextTrack, onError, onScript }) {
     this._playAudioBuffer = playAudioBuffer
     this._playJingle = playJingle
     this._synthesizeTTS = synthesizeTTS
@@ -108,6 +108,7 @@ class DJEngine {
     this._getPlaylist = getPlaylist
     this._getNextTrack = getNextTrack || null
     this._onError = onError || null
+    this._onScript = onScript || null
   }
 
   async runBreak() {
@@ -134,6 +135,7 @@ class DJEngine {
       : (settings.personalityPhrases || [])
     const phrase = pickPhrase(phrases, lang)
     const script = buildDJScript(currentTrack, nextTrack, currentTimeString(), phrase, settings.ttsVoice)
+    if (this._onScript) this._onScript(script)
 
     try {
       const audioBuffer = await this._synthesizeTTS(script, settings.ttsEngine, settings.ttsVoice)
