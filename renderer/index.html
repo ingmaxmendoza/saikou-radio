@@ -186,7 +186,7 @@
       font-family: var(--font-ui);
       font-size: 10px;
     }
-    #mini-btn, #fullscreen-btn, #remote-btn {
+    #mini-btn, #fullscreen-btn, #remote-btn, #timers-btn {
       background: var(--btn-bg, #d0d0d8);
       color: var(--btn-text, #111);
       border: 2px solid var(--border-light, #fff);
@@ -384,6 +384,17 @@
       font-size: 15px; font-family: var(--font-ui);
     }
     #fs-volume { max-width: 140px; flex: none; width: 140px; }
+
+    #timers-overlay { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.6); align-items: center; justify-content: center; }
+    #timers-overlay.show { display: flex; }
+    #timers-card { background: var(--bg-secondary, #e4e4e8); color: var(--text-primary, #111); border: 2px solid var(--border-dark, #888); border-radius: 6px; padding: 16px 20px; min-width: 280px; font-family: var(--font-ui); }
+    #timers-card h3 { font-size: 13px; margin: 0 0 8px; }
+    #timers-card .grp { margin-bottom: 14px; }
+    #timers-card .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary, #555); margin-bottom: 6px; }
+    #timers-card .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    #timers-card button { font-family: var(--font-ui); font-size: 11px; padding: 4px 10px; cursor: pointer; background: var(--btn-bg, #d0d0d8); color: var(--btn-text, #111); border: 2px solid var(--border-light, #fff); border-right-color: var(--border-dark, #888); border-bottom-color: var(--border-dark, #888); }
+    #timers-card .display { font-family: var(--font-mono, monospace); color: var(--text-accent, #007); font-size: 13px; margin-top: 6px; }
+    #timers-close { margin-top: 6px; }
   </style>
 </head>
 <body>
@@ -456,6 +467,7 @@
         <span class="dj-label" id="dj-status"></span>
       </div>
       <button id="settings-btn">Settings</button>
+      <button id="timers-btn" title="Timers">⏱</button>
       <button id="remote-btn" title="Phone remote">📱</button>
       <button id="fullscreen-btn" title="Fullscreen (F)">&#9974;</button>
       <button id="mini-btn" title="Mini player">_</button>
@@ -488,6 +500,33 @@
       <div id="remote-url"></div>
       <div id="remote-msg"></div>
       <button id="remote-close">Close</button>
+    </div>
+  </div>
+  <div id="timers-overlay">
+    <div id="timers-card">
+      <h3>⏱ Timers</h3>
+      <div class="grp">
+        <div class="lbl">Sleep</div>
+        <div class="btns">
+          <button data-sleep="0">Off</button>
+          <button data-sleep="15">15m</button>
+          <button data-sleep="30">30m</button>
+          <button data-sleep="60">60m</button>
+          <button data-sleep="90">90m</button>
+        </div>
+        <div class="display" id="sleep-display">Sleep off</div>
+      </div>
+      <div class="grp">
+        <div class="lbl">Pomodoro</div>
+        <div class="btns">
+          <button id="pomo-start">Start</button>
+          <button id="pomo-pause">Pause</button>
+          <button id="pomo-skip">Skip</button>
+          <button id="pomo-reset">Reset</button>
+        </div>
+        <div class="display" id="pomo-display">Idle</div>
+      </div>
+      <button id="timers-close">Close</button>
     </div>
   </div>
   <script src="app.js"></script>

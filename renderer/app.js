@@ -6,6 +6,7 @@ const { DJEngine } = require('./dj')
 const { ThemeEngine } = require('./theme')
 const { VisualizerEngine } = require('./visualizer')
 const { nextFromQueue } = require('./remote-queue')
+const { PomodoroTimer } = require('./pomodoro')
 const fs = require('fs')
 const path = require('path')
 
@@ -25,6 +26,9 @@ let chromeTimer = null
 let rotateCounter = 0
 let requestQueue = []
 let lastElapsed = 0
+let pomodoro = null
+let sleepEndsAt = null
+let sleepFading = false
 
 // --- DOM refs ---
 const $ = (id) => document.getElementById(id)
@@ -106,6 +110,10 @@ async function loadSettings() {
     setTimeout(() => visualizer.refreshColors(), 150)
   }
   btnShuffle.classList.toggle('active', !!settings.shuffle)
+  if (pomodoro) pomodoro.configure({
+    focus: settings.pomodoroWork, short: settings.pomodoroShortBreak,
+    long: settings.pomodoroLongBreak, longEvery: settings.pomodoroLongEvery,
+  })
 }
 
 // --- Playlist rendering ---
@@ -285,6 +293,91 @@ function cycleVisualizer() {
   window.saikouAPI.saveSettings({ visualizerStyle: style })
 }
 
+function pomodoroLang() { return (settings.ttsVoice || '').toLowerCase().startsWith('es-') ? 'es' : 'en' }
+function pickPomodoroPhrase(kindGroup) {
+  const lang = pomodoroLang()
+  let arr
+  if (kindGroup === 'focus') arr = lang === 'es' ? settings.pomodoroFocusPhrasesES : settings.pomodoroFocusPhrases
+  else arr = lang === 'es' ? settings.pomodoroBreakPhrasesES : settings.pomodoroBreakPhrases
+  arr = arr || []
+  if (arr.length === 0) return ''
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+async function speakOverMusic(text) {
+  if (!text) return
+  const wasPlaying = isPlaying
+  const resumeAt = lastElapsed
+  const track = playlist.currentTrack()
+  try {
+    const buf = await window.saikouAPI.synthesizeTTS(text, settings.ttsEngine, settings.ttsVoice)
+    await audio.playBuffer(buf)
+  } catch (err) {
+    console.error('[pomodoro speak]', err)
+  }
+  if (wasPlaying && track) {
+    try { await audio.playFile(track.path); audio.seekTo(resumeAt) } catch {}
+  }
+}
+
+pomodoro = new PomodoroTimer({
+  onPhaseChange: ({ phase, kind }) => {
+    if (phase === 'idle') return
+    speakOverMusic(pickPomodoroPhrase(phase === 'focus' ? 'focus' : 'break'))
+    updateTimerUI()
+  },
+  onTick: () => { updateTimerUI() },
+})
+
+function setSleep(minutes) {
+  if (!minutes || minutes <= 0) { sleepEndsAt = null; updateTimerUI(); return }
+  sleepEndsAt = Date.now() + minutes * 60000
+  updateTimerUI()
+}
+
+function sleepRemainingMs() { return sleepEndsAt ? Math.max(0, sleepEndsAt - Date.now()) : 0 }
+
+async function sleepFadeOutAndPause() {
+  if (sleepFading) return
+  sleepFading = true
+  const saved = audio.getVolume()
+  const steps = 20, dur = 5000
+  for (let i = steps; i >= 0; i--) {
+    audio.setVolume((saved * i) / steps)
+    await new Promise(r => setTimeout(r, dur / steps))
+  }
+  await audio.pause()
+  isPlaying = false
+  btnPlay.textContent = '>'
+  syncMiniPlay()
+  audio.setVolume(saved)
+  sleepFading = false
+  pushRemoteState()
+}
+
+function fmtClock(totalSec) {
+  const m = Math.floor(totalSec / 60), s = Math.floor(totalSec % 60)
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+function updateTimerUI() {
+  const ps = pomodoro ? pomodoro.getState() : { phase: 'idle' }
+  const pEl = $('pomo-display')
+  if (pEl) {
+    pEl.textContent = ps.phase === 'idle'
+      ? 'Idle'
+      : `${ps.kind === 'focus' ? 'FOCUS' : (ps.kind === 'long' ? 'LONG BREAK' : 'BREAK')} ${fmtClock(ps.remaining)}`
+  }
+  const sEl = $('sleep-display')
+  if (sEl) sEl.textContent = sleepEndsAt ? `Sleep in ${fmtClock(Math.round(sleepRemainingMs() / 1000))}` : 'Sleep off'
+}
+
+function onSecond() {
+  if (sleepEndsAt && sleepRemainingMs() <= 0) { sleepEndsAt = null; sleepFadeOutAndPause() }
+  updateTimerUI()
+  pushRemoteTick()
+}
+
 function buildRemoteState() {
   const t = playlist.currentTrack()
   const order = (settings.shuffle && shuffleQueue.length === playlist.tracks.length)
@@ -303,10 +396,16 @@ function buildRemoteState() {
     currentIndex: playlist.currentIndex,
     tracks: order.map(i => ({ index: i, title: playlist.tracks[i].title, artist: playlist.tracks[i].artist })),
     queue: requestQueue.slice(),
+    sleep: { active: !!sleepEndsAt, remaining: Math.round(sleepRemainingMs() / 1000) },
+    pomodoro: pomodoro ? pomodoro.getState() : { phase: 'idle' },
   }
 }
 function buildRemoteTick() {
-  return { type: 'tick', isPlaying, elapsed: lastElapsed, duration: audio._duration || 0, volume: audio.getVolume() }
+  return {
+    type: 'tick', isPlaying, elapsed: lastElapsed, duration: audio._duration || 0, volume: audio.getVolume(),
+    sleep: { active: !!sleepEndsAt, remaining: Math.round(sleepRemainingMs() / 1000) },
+    pomodoro: pomodoro ? pomodoro.getState() : { phase: 'idle' },
+  }
 }
 function pushRemoteState() { window.saikouAPI.sendRemoteState(buildRemoteState()) }
 function pushRemoteTick()  { window.saikouAPI.sendRemoteState(buildRemoteTick()) }
@@ -336,6 +435,11 @@ function handleRemoteCommand(cmd) {
     case 'queue-remove':
       if (Number.isInteger(cmd.index)) { const p = requestQueue.indexOf(cmd.index); if (p >= 0) requestQueue.splice(p, 1); pushRemoteState() }
       break
+    case 'sleep-set': setSleep(Number(cmd.minutes) || 0); break
+    case 'pomo-start': if (pomodoro) pomodoro.start(); break
+    case 'pomo-pause': if (pomodoro) pomodoro.pause(); break
+    case 'pomo-reset': if (pomodoro) pomodoro.reset(); break
+    case 'pomo-skip':  if (pomodoro) pomodoro.skip(); break
   }
   pushRemoteState()
 }
@@ -524,6 +628,16 @@ $('remote-btn').onclick = async () => {
 }
 $('remote-close').onclick = () => $('remote-overlay').classList.remove('show')
 $('remote-overlay').onclick = (e) => { if (e.target === $('remote-overlay')) $('remote-overlay').classList.remove('show') }
+$('timers-btn').onclick = () => { updateTimerUI(); $('timers-overlay').classList.add('show') }
+$('timers-close').onclick = () => $('timers-overlay').classList.remove('show')
+$('timers-overlay').onclick = (e) => { if (e.target === $('timers-overlay')) $('timers-overlay').classList.remove('show') }
+document.querySelectorAll('#timers-card [data-sleep]').forEach(b => {
+  b.onclick = () => setSleep(parseInt(b.getAttribute('data-sleep'), 10))
+})
+$('pomo-start').onclick = () => { if (pomodoro) pomodoro.start() }
+$('pomo-pause').onclick = () => { if (pomodoro) pomodoro.pause() }
+$('pomo-skip').onclick  = () => { if (pomodoro) pomodoro.skip() }
+$('pomo-reset').onclick = () => { if (pomodoro) pomodoro.reset() }
 $('fs-exit').onclick = exitFullscreen
 $('fs-prev').onclick = () => $('btn-prev').click()
 $('fs-play').onclick = () => btnPlay.click()
@@ -597,7 +711,7 @@ $('mini-expand').onclick = async () => {
 
 // --- Remote control ---
 window.saikouAPI.onRemoteCommand(handleRemoteCommand)
-setInterval(() => pushRemoteTick(), 1000)
+setInterval(onSecond, 1000)
 
 // --- Init ---
 loadSettings()
