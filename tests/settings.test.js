@@ -69,3 +69,15 @@ test('Phase 2 remote defaults exist', () => {
   expect(DEFAULTS.remoteEnabled).toBe(false)
   expect(DEFAULTS.remotePort).toBe(7000)
 })
+
+test('Phase 3 pomodoro defaults exist', () => {
+  expect(DEFAULTS.pomodoroWork).toBe(25)
+  expect(DEFAULTS.pomodoroShortBreak).toBe(5)
+  expect(DEFAULTS.pomodoroLongBreak).toBe(15)
+  expect(DEFAULTS.pomodoroLongEvery).toBe(4)
+  expect(Array.isArray(DEFAULTS.pomodoroFocusPhrases)).toBe(true)
+  expect(DEFAULTS.pomodoroFocusPhrases.length).toBeGreaterThan(0)
+  expect(Array.isArray(DEFAULTS.pomodoroFocusPhrasesES)).toBe(true)
+  expect(Array.isArray(DEFAULTS.pomodoroBreakPhrases)).toBe(true)
+  expect(Array.isArray(DEFAULTS.pomodoroBreakPhrasesES)).toBe(true)
+})
