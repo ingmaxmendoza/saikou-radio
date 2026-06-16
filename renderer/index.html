@@ -186,7 +186,7 @@
       font-family: var(--font-ui);
       font-size: 10px;
     }
-    #mini-btn {
+    #mini-btn, #fullscreen-btn {
       background: var(--btn-bg, #d0d0d8);
       color: var(--btn-text, #111);
       border: 2px solid var(--border-light, #fff);
@@ -313,6 +313,61 @@
       border-right-color: var(--border-light, #fff);
       border-bottom-color: var(--border-light, #fff);
     }
+
+    /* ── Master volume row ── */
+    #volume-row { display: flex; align-items: center; gap: 8px; }
+    #volume-row .vol-icon { font-size: 11px; color: var(--text-secondary, #555); letter-spacing: 1px; }
+    #volume-slider, #fs-volume {
+      flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
+      background: var(--text-accent, #00e5ff); border-radius: 2px; cursor: pointer; outline: none;
+    }
+    #volume-slider::-webkit-slider-thumb, #fs-volume::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--text-accent, #00e5ff); border: 2px solid var(--bg-lcd, #1a1a2e); cursor: pointer;
+    }
+
+    /* ── Fullscreen mode ── */
+    body.fullscreen #titlebar, body.fullscreen #main, body.fullscreen #mini-bar { display: none !important; }
+    body.fullscreen #fullscreen { display: flex; }
+    #fullscreen {
+      display: none; position: fixed; inset: 0; flex-direction: column;
+      background: var(--bg-lcd, #0d0d1a); overflow: hidden;
+    }
+    #fs-ambient {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      filter: blur(40px) brightness(0.35); opacity: 0; transition: opacity 0.8s; z-index: 0;
+    }
+    #fs-ambient.visible { opacity: 1; }
+    #viz-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
+    #fs-countdown {
+      position: absolute; top: 28px; right: 40px; z-index: 3;
+      font-family: var(--font-mono, monospace); font-size: 14px; color: var(--text-secondary, #88ccdd);
+    }
+    #fs-overlay {
+      position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column;
+      pointer-events: none; padding: 30px 40px;
+    }
+    #fs-title { font-size: 38px; font-weight: bold; color: var(--text-accent, #00e5ff); text-shadow: 0 2px 24px rgba(0,0,0,.7); }
+    #fs-artist { font-size: 20px; color: var(--text-secondary, #88ccdd); margin-top: 6px; }
+    #fs-subtitle {
+      margin-top: auto; align-self: center; max-width: 80%; text-align: center;
+      font-size: 30px; line-height: 1.4; color: #fff; text-shadow: 0 2px 24px rgba(0,0,0,.85);
+      opacity: 0; transition: opacity 0.4s;
+    }
+    #fs-subtitle.visible { opacity: 1; }
+    #fs-controls {
+      position: relative; z-index: 3; display: flex; align-items: center; justify-content: center; gap: 14px;
+      padding: 16px; background: linear-gradient(transparent, rgba(0,0,0,.5)); transition: opacity 0.4s;
+    }
+    body.chrome-hidden #fs-controls { opacity: 0; pointer-events: none; }
+    body.chrome-hidden { cursor: none; }
+    #fs-controls button {
+      background: var(--btn-bg, #d0d0d8); color: var(--btn-text, #111);
+      border: 2px solid var(--border-light, #fff); border-right-color: var(--border-dark, #888);
+      border-bottom-color: var(--border-dark, #888); padding: 8px 14px; cursor: pointer;
+      font-size: 15px; font-family: var(--font-ui);
+    }
+    #fs-volume { max-width: 140px; flex: none; width: 140px; }
   </style>
 </head>
 <body>
@@ -359,6 +414,10 @@
         <button class="ctrl-btn" id="btn-shuffle" title="Shuffle">RND</button>
         <button id="open-btn" style="flex:2">Open Playlist (.m3u)</button>
       </div>
+      <div id="volume-row">
+        <span class="vol-icon">VOL</span>
+        <input type="range" id="volume-slider" min="0" max="100" value="100">
+      </div>
     </div>
     <div id="playlist-panel">
       <div class="pl-header">Playlist</div>
@@ -381,7 +440,28 @@
         <span class="dj-label" id="dj-status"></span>
       </div>
       <button id="settings-btn">Settings</button>
+      <button id="fullscreen-btn" title="Fullscreen (F)">&#9974;</button>
       <button id="mini-btn" title="Mini player">_</button>
+    </div>
+  </div>
+  <div id="fullscreen">
+    <img id="fs-ambient" alt="">
+    <canvas id="viz-canvas"></canvas>
+    <div id="fs-countdown">--:--</div>
+    <div id="fs-overlay">
+      <div id="fs-top">
+        <div id="fs-title">No track</div>
+        <div id="fs-artist"></div>
+      </div>
+      <div id="fs-subtitle"></div>
+    </div>
+    <div id="fs-controls">
+      <button id="fs-prev">|&lt;</button>
+      <button id="fs-play">&gt;</button>
+      <button id="fs-next">&gt;|</button>
+      <input type="range" id="fs-volume" min="0" max="100" value="100">
+      <button id="fs-cycle" title="Cycle visualizer (V)">VIZ</button>
+      <button id="fs-exit" title="Exit (Esc)">&#9974;</button>
     </div>
   </div>
   <script src="app.js"></script>
