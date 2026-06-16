@@ -82,6 +82,7 @@ class VisualizerEngine {
     const ctx = this._ctx
     const W = this._canvas.width, H = this._canvas.height
     ctx.clearRect(0, 0, W, H)
+    ctx.globalAlpha = 1
     if (!analyser) return
     if (this._style === 'scope') this._drawScope(analyser, W, H)
     else if (this._style === 'radial') this._drawRadial(analyser, W, H)
@@ -137,7 +138,8 @@ class VisualizerEngine {
     const n = 64
     const step = Math.floor(data.length / 2 / n) || 1
     ctx.save()
-    ctx.beginPath(); ctx.arc(cx, cy, R - 4, 0, Math.PI * 2); ctx.closePath(); ctx.clip()
+    const clipR = Math.max(0, R - 4)
+    ctx.beginPath(); ctx.arc(cx, cy, clipR, 0, Math.PI * 2); ctx.closePath(); ctx.clip()
     if (this._artImg) {
       ctx.drawImage(this._artImg, cx - R, cy - R, R * 2, R * 2)
     } else {
@@ -150,15 +152,15 @@ class VisualizerEngine {
     ctx.restore()
     ctx.strokeStyle = this._colors.accent
     ctx.lineWidth = Math.max(2, W / 500)
+    ctx.beginPath()
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2
       const v = data[i * step] / 255
       const len = R * 0.3 + v * R * 2.4
-      ctx.beginPath()
       ctx.moveTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R)
       ctx.lineTo(cx + Math.cos(a) * (R + len), cy + Math.sin(a) * (R + len))
-      ctx.stroke()
     }
+    ctx.stroke()
   }
 
   _drawParticles(analyser, W, H) {
