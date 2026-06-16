@@ -117,24 +117,111 @@ async function loadSettings() {
 }
 
 // --- Playlist rendering ---
+function makeTrackRow(i) {
+  const t = playlist.tracks[i]
+  const isActive = i === playlist.currentIndex
+  const div = document.createElement('div')
+  div.className = 'pl-track' + (t.error ? ' error' : '') + (isActive ? ' active' : '')
+  div.textContent = (isActive ? '► ' : '') + (t.artist ? `${t.artist} - ${t.title}` : t.title)
+  div.onclick = () => {
+    if (settings.shuffle) shufflePos = shuffleQueue.indexOf(i)
+    playTrackAt(i)
+  }
+  return div
+}
+
 function renderPlaylist() {
   playlistList.innerHTML = ''
-  const order = (settings.shuffle && shuffleQueue.length === playlist.tracks.length)
-    ? shuffleQueue
-    : playlist.tracks.map((_, i) => i)
-
-  order.forEach(i => {
-    const t = playlist.tracks[i]
-    const isActive = i === playlist.currentIndex
-    const div = document.createElement('div')
-    div.className = 'pl-track' + (t.error ? ' error' : '') + (isActive ? ' active' : '')
-    div.textContent = (isActive ? '► ' : '') + (t.artist ? `${t.artist} - ${t.title}` : t.title)
-    div.onclick = () => {
-      if (settings.shuffle) shufflePos = shuffleQueue.indexOf(i)
-      playTrackAt(i)
+  const shuffleActive = settings.shuffle && shuffleQueue.length === playlist.tracks.length
+  if (shuffleActive) {
+    shuffleQueue.forEach(i => playlistList.appendChild(makeTrackRow(i)))
+    return
+  }
+  let lastSource = null
+  playlist.tracks.forEach((t, i) => {
+    if (t.source !== lastSource) {
+      lastSource = t.source
+      const h = document.createElement('div')
+      h.className = 'pl-group'
+      h.textContent = t.source || 'Playlist'
+      playlistList.appendChild(h)
     }
-    playlistList.appendChild(div)
+    playlistList.appendChild(makeTrackRow(i))
   })
+}
+
+async function loadPlaylists(paths, { append = true } = {}) {
+  if (!paths || paths.length === 0) return
+  const openBtn = $('open-btn')
+  try {
+    if (!append) { playlist.clear(); failedTracks.clear(); requestQueue = [] }
+    const startIndex = playlist.tracks.length
+    for (const p of paths) {
+      const bytes = await window.saikouAPI.readFileAsBuffer(p)
+      const buf = bytes instanceof Uint8Array ? bytes : new Uint8Array(Object.values(bytes))
+      const text = new TextDecoder().decode(buf)
+      playlist.addFromText(text, p)
+    }
+    renderPlaylist()
+    if (playlist.tracks.length === 0) { djStatus.textContent = 'No tracks found in playlist.'; return }
+
+    openBtn.disabled = true
+    if (!isPlaying) { trackTitle.textContent = 'Loading playlist...'; trackMeta.textContent = '' }
+
+    const pending = playlist.tracks.filter(t => !t._metaLoaded)
+    const total = pending.length
+    let loaded = 0
+    djStatus.textContent = `0 / ${total}`
+    const BATCH = 8
+    for (let i = 0; i < total; i += BATCH) {
+      await Promise.all(pending.slice(i, i + BATCH).map(async (track) => {
+        try {
+          const meta = await window.saikouAPI.readMetadata(track.path)
+          if (meta.title)  track.title  = meta.title
+          if (meta.artist) track.artist = meta.artist
+          track._picture = meta.picture
+        } catch {}
+        track._metaLoaded = true
+        loaded++
+        djStatus.textContent = `${loaded} / ${total}`
+      }))
+      renderPlaylist()
+    }
+
+    openBtn.disabled = false
+    djStatus.textContent = ''
+    if (settings.shuffle && playlist.tracks.length > 1) buildShuffleQueue(isPlaying ? playlist.currentIndex : 0)
+    if (!scheduler) {
+      scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })
+      scheduler.start()
+      startCountdownDisplay()
+    }
+    if (!isPlaying) {
+      await playTrackAt(settings.shuffle ? shuffleQueue[0] : startIndex)
+    }
+    pushRemoteState()
+  } catch (err) {
+    openBtn.disabled = false
+    djStatus.textContent = `Error: ${err.message}`
+    console.error('loadPlaylists error:', err)
+  }
+}
+
+async function clearPlaylists() {
+  await audio.pause()
+  playlist.clear()
+  failedTracks.clear()
+  requestQueue = []
+  shuffleQueue = []
+  isPlaying = false
+  btnPlay.textContent = '>'
+  trackTitle.textContent = 'No playlist loaded'
+  trackMeta.textContent = 'Open a .m3u file to begin'
+  albumArt.classList.remove('visible'); albumArt.src = ''
+  if (scheduler) { scheduler.stop(); scheduler = null }
+  renderPlaylist()
+  syncMiniPlay()
+  pushRemoteState()
 }
 
 function updateNowPlaying() {
@@ -537,60 +624,12 @@ $('btn-next').onclick = async () => {
 }
 
 $('open-btn').onclick = async () => {
-  try {
-    const filePath = await window.saikouAPI.openFileDialog()
-    if (!filePath) return
-    const bytes = await window.saikouAPI.readFileAsBuffer(filePath)
-    const buf = bytes instanceof Uint8Array ? bytes : new Uint8Array(Object.values(bytes))
-    const text = new TextDecoder().decode(buf)
-    playlist.loadFromText(text, filePath)
-    failedTracks.clear()
-    requestQueue = []
-    renderPlaylist()
-    if (playlist.tracks.length === 0) {
-      djStatus.textContent = 'No tracks found in playlist.'
-      return
-    }
-
-    // Lock UI during metadata load
-    const openBtn = $('open-btn')
-    openBtn.disabled = true
-    trackTitle.textContent = 'Loading playlist...'
-    trackMeta.textContent = ''
-
-    const total = playlist.tracks.length
-    let loaded = 0
-    djStatus.textContent = `0 / ${total}`
-
-    const BATCH = 8
-    for (let i = 0; i < total; i += BATCH) {
-      await Promise.all(playlist.tracks.slice(i, i + BATCH).map(async (track) => {
-        try {
-          const meta = await window.saikouAPI.readMetadata(track.path)
-          if (meta.title)  track.title  = meta.title
-          if (meta.artist) track.artist = meta.artist
-          track._picture = meta.picture
-        } catch {}
-        loaded++
-        djStatus.textContent = `${loaded} / ${total}`
-      }))
-      renderPlaylist()
-    }
-
-    openBtn.disabled = false
-    djStatus.textContent = ''
-    if (settings.shuffle && playlist.tracks.length > 1) buildShuffleQueue(0)
-    if (scheduler) scheduler.stop()
-    scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })
-    scheduler.start()
-    startCountdownDisplay()
-    await playTrackAt(settings.shuffle ? shuffleQueue[0] : 0)
-  } catch (err) {
-    $('open-btn').disabled = false
-    djStatus.textContent = `Error: ${err.message}`
-    console.error('open-btn error:', err)
-  }
+  const paths = await window.saikouAPI.openPlaylists()
+  await loadPlaylists(paths, { append: true })
 }
+
+const clearBtn = $('clear-btn')
+if (clearBtn) clearBtn.onclick = () => clearPlaylists()
 
 $('settings-btn').onclick = () => window.saikouAPI.openSettingsWindow()
 
