@@ -6,7 +6,8 @@ test('includes current track info', () => {
     { title: 'Blue Monday', artist: 'New Order' },
     { title: 'Take On Me', artist: 'A-ha' },
     '3:45 PM',
-    'Stay locked in, this is Saikou Radio.'
+    'Stay locked in, this is Saikou Radio.',
+    'en-US-AriaNeural'
   )
   expect(script).toContain('Blue Monday')
   expect(script).toContain('New Order')
@@ -21,7 +22,8 @@ test('handles missing next track gracefully', () => {
     { title: 'Song', artist: 'Artist' },
     null,
     '1:00 PM',
-    'Vibes all day.'
+    'Vibes all day.',
+    'en-US-GuyNeural'
   )
   expect(script).not.toContain('undefined')
   expect(script).not.toContain('null')
@@ -32,7 +34,8 @@ test('handles missing artist gracefully', () => {
     { title: 'Unknown Track', artist: '' },
     null,
     '2:00 PM',
-    'Keep it going.'
+    'Keep it going.',
+    'en-US-AriaNeural'
   )
   expect(script).toContain('Unknown Track')
   expect(script).not.toContain('by ')
