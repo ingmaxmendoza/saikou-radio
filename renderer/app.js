@@ -33,6 +33,23 @@ const btnPlay = $('btn-play')
 const btnMono = $('btn-mono')
 const btnShuffle = $('btn-shuffle')
 const albumArt = $('album-art')
+const volumeSlider = $('volume-slider')
+const fsVolume = $('fs-volume')
+
+function applyVolume(v, persist) {
+  const vol = Math.max(0, Math.min(1, v))
+  audio.setVolume(vol)
+  const pct = Math.round(vol * 100)
+  if (volumeSlider) volumeSlider.value = pct
+  if (fsVolume) fsVolume.value = pct
+  if (persist) {
+    settings.volume = vol
+    window.saikouAPI.saveSettings({ volume: vol })
+  }
+}
+
+if (volumeSlider) volumeSlider.addEventListener('input', () => applyVolume(volumeSlider.value / 100, true))
+if (fsVolume) fsVolume.addEventListener('input', () => applyVolume(fsVolume.value / 100, true))
 
 let monoEnabled = false
 let seekDragging = false
@@ -67,6 +84,7 @@ async function loadSettings() {
   djEngineEl.textContent = (settings.ttsEngine || 'edge').toUpperCase()
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
   audio.setFadeDuration(settings.fadeSeconds ?? 2)
+  applyVolume(settings.volume ?? 1, false)
   btnShuffle.classList.toggle('active', !!settings.shuffle)
 }
 
