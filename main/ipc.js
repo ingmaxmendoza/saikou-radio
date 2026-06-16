@@ -196,6 +196,16 @@ $s.GetInstalledVoices() | ForEach-Object {
     win.setResizable(false)
   })
 
+  ipcMain.handle('window:fullscreen', () => {
+    const win = getMainWindow()
+    if (win) win.setFullScreen(true)
+  })
+
+  ipcMain.handle('window:windowed', () => {
+    const win = getMainWindow()
+    if (win) win.setFullScreen(false)
+  })
+
   ipcMain.handle('fs:readFile', (_e, filePath) => {
     const ext = path.extname(filePath).toLowerCase()
     if (!ALLOWED_EXTENSIONS.has(ext)) {

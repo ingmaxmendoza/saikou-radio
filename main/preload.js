@@ -16,4 +16,5 @@ window.saikouAPI = {
   openSettingsWindow: () => ipcRenderer.invoke('window:openSettings'),
   listVoices: (engine) => ipcRenderer.invoke('tts:listVoices', engine),
   setMiniMode: (on) => ipcRenderer.invoke(on ? 'window:mini' : 'window:restore'),
+  setFullscreen: (on) => ipcRenderer.invoke(on ? 'window:fullscreen' : 'window:windowed'),
 }
