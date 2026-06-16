@@ -628,6 +628,16 @@ $('remote-btn').onclick = async () => {
 }
 $('remote-close').onclick = () => $('remote-overlay').classList.remove('show')
 $('remote-overlay').onclick = (e) => { if (e.target === $('remote-overlay')) $('remote-overlay').classList.remove('show') }
+$('timers-btn').onclick = () => { updateTimerUI(); $('timers-overlay').classList.add('show') }
+$('timers-close').onclick = () => $('timers-overlay').classList.remove('show')
+$('timers-overlay').onclick = (e) => { if (e.target === $('timers-overlay')) $('timers-overlay').classList.remove('show') }
+document.querySelectorAll('#timers-card [data-sleep]').forEach(b => {
+  b.onclick = () => setSleep(parseInt(b.getAttribute('data-sleep'), 10))
+})
+$('pomo-start').onclick = () => { if (pomodoro) pomodoro.start() }
+$('pomo-pause').onclick = () => { if (pomodoro) pomodoro.pause() }
+$('pomo-skip').onclick  = () => { if (pomodoro) pomodoro.skip() }
+$('pomo-reset').onclick = () => { if (pomodoro) pomodoro.reset() }
 $('fs-exit').onclick = exitFullscreen
 $('fs-prev').onclick = () => $('btn-prev').click()
 $('fs-play').onclick = () => btnPlay.click()
