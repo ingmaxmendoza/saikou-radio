@@ -1,0 +1,91 @@
+/* themes/win98.css — Classic Windows 98 look, relies on 98.css as base */
+:root {
+  --bg-primary: #c0c0c0;
+  --bg-secondary: #c0c0c0;
+  --bg-panel: #c0c0c0;
+  --bg-lcd: #000080;
+  --text-primary: #000000;
+  --text-secondary: #444444;
+  --text-accent: #ffffff;
+  --border-light: #ffffff;
+  --border-dark: #808080;
+  --btn-bg: #c0c0c0;
+  --btn-text: #000000;
+  --font-ui: 'MS Sans Serif', 'Microsoft Sans Serif', Arial, sans-serif;
+  --font-mono: 'Fixedsys', 'Courier New', monospace;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 11px;
+}
+
+/* Titlebar as Win98 active window caption */
+#titlebar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: #ffffff;
+  border-bottom: none;
+  padding: 3px 4px;
+}
+#titlebar .logo { color: #ffffff; font-weight: bold; }
+#titlebar .clock { color: #ffffff; }
+
+/* LCD panel uses navy like a Win98 active title / DOS window */
+#lcd {
+  background: #000080;
+  color: #ffffff;
+  border: inset 2px;
+  font-family: var(--font-mono);
+}
+#lcd .track-title {
+  color: #ffffff;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: bold;
+}
+#lcd .track-meta {
+  color: #ffffff !important;
+  opacity: 0.85;
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+/* Playlist panel */
+#playlist-panel { background: #ffffff; border: inset 2px; }
+#playlist-panel .pl-header { color: #000080; }
+.pl-track:hover { background: #000080; color: #ffffff; }
+.pl-track.active { background: #000080; color: #ffffff; font-weight: bold; }
+
+/* DJ panel */
+#dj-panel {
+  background: #c0c0c0;
+  border-top: 2px solid #808080;
+}
+#dj-panel .dj-label { color: #444; }
+
+/* Force Win98 font everywhere */
+* { font-family: var(--font-ui) !important; }
+#lcd, #lcd .track-title, #lcd .track-meta { font-family: var(--font-ui) !important; }
+
+/* Buttons — 98.css handles the bevel, we just set colors */
+.ctrl-btn, #open-btn, #settings-btn {
+  font-size: 11px;
+}
+.ctrl-btn.active,
+body .ctrl-btn.active {
+  background: #000080 !important;
+  color: #ffffff !important;
+  border-color: #808080 !important;
+}
+
+/* Seek slider */
+#seek-slider {
+  background: linear-gradient(to right, #000080 0%, #000080 var(--seek-pct, 0%), #808080 var(--seek-pct, 0%), #808080 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #c0c0c0 !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+}

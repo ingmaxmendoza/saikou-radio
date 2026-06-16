@@ -1,21 +1,24 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, Menu } = require('electron')
 const path = require('path')
 const { registerIpcHandlers } = require('./ipc')
+
+Menu.setApplicationMenu(null)
 
 let mainWindow
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 760,
-    height: 420,
+    height: 440,
     resizable: false,
-    title: 'Saikou Radio',
+    frame: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
       preload: path.join(__dirname, 'preload.js'),
     },
   })
+  mainWindow.removeMenu()
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
 }
 

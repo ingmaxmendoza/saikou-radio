@@ -4,6 +4,7 @@ const { AudioPlayer } = require('./audio')
 const { BreakScheduler } = require('./scheduler')
 const { DJEngine } = require('./dj')
 const { ThemeEngine } = require('./theme')
+const { VisualizerEngine } = require('./visualizer')
 const fs = require('fs')
 const path = require('path')
 
@@ -17,6 +18,10 @@ let isPlaying = false
 let breakPending = false
 let countdownIntervalId = null
 let currentArtist = ''
+let visualizer = null
+let isFullscreen = false
+let chromeTimer = null
+let rotateCounter = 0
 
 // --- DOM refs ---
 const $ = (id) => document.getElementById(id)
@@ -33,6 +38,30 @@ const btnPlay = $('btn-play')
 const btnMono = $('btn-mono')
 const btnShuffle = $('btn-shuffle')
 const albumArt = $('album-art')
+const volumeSlider = $('volume-slider')
+const fsVolume = $('fs-volume')
+
+function applyVolume(v, persist) {
+  const vol = Math.max(0, Math.min(1, v))
+  audio.setVolume(vol)
+  const pct = Math.round(vol * 100)
+  if (volumeSlider) volumeSlider.value = pct
+  if (fsVolume) fsVolume.value = pct
+  if (persist) {
+    settings.volume = vol
+    window.saikouAPI.saveSettings({ volume: vol })
+  }
+}
+
+if (volumeSlider) volumeSlider.addEventListener('input', () => applyVolume(volumeSlider.value / 100, true))
+if (fsVolume) fsVolume.addEventListener('input', () => applyVolume(fsVolume.value / 100, true))
+
+const fsTitle = $('fs-title')
+const fsArtist = $('fs-artist')
+const fsCountdown = $('fs-countdown')
+const fsAmbient = $('fs-ambient')
+const fsSubtitle = $('fs-subtitle')
+visualizer = new VisualizerEngine($('viz-canvas'), () => audio.getAnalyser())
 
 let monoEnabled = false
 let seekDragging = false
@@ -67,6 +96,11 @@ async function loadSettings() {
   djEngineEl.textContent = (settings.ttsEngine || 'edge').toUpperCase()
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
   audio.setFadeDuration(settings.fadeSeconds ?? 2)
+  applyVolume(settings.volume ?? 1, false)
+  if (visualizer) {
+    visualizer.setStyle(settings.visualizerStyle || 'bars')
+    setTimeout(() => visualizer.refreshColors(), 150)
+  }
   btnShuffle.classList.toggle('active', !!settings.shuffle)
 }
 
@@ -99,6 +133,7 @@ function updateNowPlaying() {
   trackMeta.textContent = currentArtist
   renderPlaylist()
   syncMiniTrack()
+  if (isFullscreen) syncFullscreenInfo()
 }
 
 // --- Metadata ---
@@ -110,6 +145,16 @@ function showAlbumArt(track) {
   } else {
     albumArt.src = ''
     albumArt.classList.remove('visible')
+  }
+  if (visualizer) visualizer.setArt(pic || null)
+  if (fsAmbient) {
+    if (pic && settings.ambientArtBackground !== false) {
+      fsAmbient.src = pic
+      fsAmbient.classList.add('visible')
+    } else {
+      fsAmbient.classList.remove('visible')
+      fsAmbient.src = ''
+    }
   }
 }
 
@@ -126,6 +171,10 @@ async function playTrackAt(index) {
     isPlaying = true
     btnPlay.textContent = '||'
     syncMiniPlay()
+    if (isFullscreen && settings.visualizerAutoRotate && visualizer) {
+      rotateCounter++
+      if (rotateCounter >= (settings.visualizerRotateEvery || 3)) { rotateCounter = 0; cycleVisualizer() }
+    }
   } catch (err) {
     console.error('playTrackAt error:', err)
     if (track) { track.error = true; djStatus.textContent = `Skip: ${err.message}` }
@@ -172,10 +221,57 @@ async function runDJBreak() {
       return playlist.tracks[(playlist.currentIndex + 1) % playlist.tracks.length] ?? null
     },
     onError: (msg) => { djStatus.textContent = `TTS error: ${msg}` },
+    onScript: (script) => { if (settings.djSubtitles) showSubtitle(script) },
   })
   await dj.runBreak()
+  hideSubtitle()
   djStatus.textContent = ''
   if (scheduler) scheduler.reset()
+}
+
+function syncFullscreenInfo() {
+  const t = playlist.currentTrack()
+  if (!t) return
+  fsTitle.textContent = t.title || 'Unknown'
+  fsArtist.textContent = t.artist || ''
+}
+
+function armChromeHide() {
+  clearTimeout(chromeTimer)
+  document.body.classList.remove('chrome-hidden')
+  chromeTimer = setTimeout(() => { if (isFullscreen) document.body.classList.add('chrome-hidden') }, 3000)
+}
+
+async function enterFullscreen() {
+  if (isFullscreen) return
+  isFullscreen = true
+  rotateCounter = 0
+  document.body.classList.add('fullscreen')
+  await window.saikouAPI.setFullscreen(true)
+  syncFullscreenInfo()
+  if (visualizer) { visualizer.refreshColors(); visualizer.resize(); visualizer.start() }
+  armChromeHide()
+}
+
+async function exitFullscreen() {
+  if (!isFullscreen) return
+  isFullscreen = false
+  document.body.classList.remove('fullscreen', 'chrome-hidden')
+  clearTimeout(chromeTimer)
+  if (visualizer) visualizer.stop()
+  await window.saikouAPI.setFullscreen(false)
+}
+
+function toggleFullscreen() { isFullscreen ? exitFullscreen() : enterFullscreen() }
+
+function showSubtitle(text) { if (fsSubtitle) { fsSubtitle.textContent = text; fsSubtitle.classList.add('visible') } }
+function hideSubtitle() { if (fsSubtitle) fsSubtitle.classList.remove('visible') }
+
+function cycleVisualizer() {
+  if (!visualizer) return
+  const style = visualizer.nextStyle()
+  settings.visualizerStyle = style
+  window.saikouAPI.saveSettings({ visualizerStyle: style })
 }
 
 audio.onTrackEnd(async () => {
@@ -230,6 +326,7 @@ function startCountdownDisplay() {
     const m = Math.floor(ms / 60000)
     const s = Math.floor((ms % 60000) / 1000)
     djCountdown.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+    if (fsCountdown) fsCountdown.textContent = djCountdown.textContent
   }, 1000)
 }
 
@@ -337,6 +434,30 @@ btnShuffle.onclick = () => {
   }
   renderPlaylist()
 }
+
+$('fullscreen-btn').onclick = toggleFullscreen
+$('fs-exit').onclick = exitFullscreen
+$('fs-prev').onclick = () => $('btn-prev').click()
+$('fs-play').onclick = () => btnPlay.click()
+$('fs-next').onclick = () => $('btn-next').click()
+$('fs-cycle').onclick = cycleVisualizer
+
+document.addEventListener('mousemove', () => { if (isFullscreen) armChromeHide() })
+window.addEventListener('resize', () => { if (visualizer) visualizer.resize() })
+
+document.addEventListener('keydown', (e) => {
+  if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return
+  switch (e.key) {
+    case ' ':          e.preventDefault(); btnPlay.click(); break
+    case 'ArrowLeft':  $('btn-prev').click(); break
+    case 'ArrowRight': $('btn-next').click(); break
+    case 'ArrowUp':    e.preventDefault(); applyVolume(audio.getVolume() + 0.05, true); break
+    case 'ArrowDown':  e.preventDefault(); applyVolume(audio.getVolume() - 0.05, true); break
+    case 'f': case 'F': toggleFullscreen(); break
+    case 'Escape':     exitFullscreen(); break
+    case 'v': case 'V': if (isFullscreen) cycleVisualizer(); break
+  }
+})
 
 // Settings window triggers a reload via IPC relay through main process
 const { ipcRenderer } = require('electron')

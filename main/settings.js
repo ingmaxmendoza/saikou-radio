@@ -14,6 +14,12 @@ const DEFAULTS = {
   shuffle: false,
   alwaysOnTop: false,
   fadeSeconds: 2,
+  volume: 1,
+  visualizerStyle: 'bars',
+  visualizerAutoRotate: false,
+  visualizerRotateEvery: 3,
+  ambientArtBackground: true,
+  djSubtitles: true,
   personalityPhrasesES: [
     "Sigue sintonizado, esto es Saikou Radio.",
     "Mantenemos el flow toda la noche.",
