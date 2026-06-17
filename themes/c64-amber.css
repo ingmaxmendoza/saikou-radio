@@ -65,3 +65,4 @@ body { background: #1818a8; color: #e8a030; }
 .tr .name.active { color: #7edfff; }
 #timers { background: #1818a8; }
 #timers .tbtns button { background: #3030b0; color: #e8a030; border: 1px solid rgba(126,223,255,0.27) !important; border-radius: 8px !important; }
+#shuffle.on { background: #7edfff !important; color: #1818a8; }
