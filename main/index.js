@@ -12,7 +12,7 @@ function createMainWindow() {
     height: 440,
     resizable: false,
     frame: false,
-    icon: path.join(__dirname, '../assets/icon.png'),
+    icon: path.join(__dirname, '../assets/icon.ico'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

@@ -1,6 +1,6 @@
 {
   "name": "saikou-radio",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Y2K-aesthetic local radio player with DJ breaks",
   "main": "main/index.js",
   "scripts": {
