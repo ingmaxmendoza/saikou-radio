@@ -1,0 +1,81 @@
+/* themes/ipod-classic.css — iPod Classic */
+:root {
+  --bg-primary: #f0f0f0;
+  --bg-secondary: #e0e0e0;
+  --bg-panel: #e8e8e8;
+  --bg-lcd: #1c1c1e;
+  --text-primary: #1c1c1e;
+  --text-secondary: #636366;
+  --text-accent: #0070c9;
+  --border-light: #ffffff;
+  --border-dark: #c7c7cc;
+  --btn-bg: #e5e5ea;
+  --btn-text: #1c1c1e;
+  --font-ui: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: 'Helvetica Neue', Helvetica, monospace;
+}
+
+body { background: #f0f0f0; color: #1c1c1e; }
+
+#titlebar { background: linear-gradient(to bottom, #ffffff 0%, #e8e8ea 50%, #d8d8da 100%); border-bottom: 1px solid #c7c7cc; }
+#titlebar .logo { color: #1c1c1e; letter-spacing: 3px; font-weight: bold; }
+#titlebar .clock { color: #636366; }
+
+#lcd {
+  background: #1c1c1e;
+  color: #0070c9;
+  border: none;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.4), 0 1px 0 #ffffff;
+  border-radius: 4px;
+}
+#lcd .track-title { color: #ffffff; font-weight: bold; }
+#lcd .track-meta { color: #aeaeb2 !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #0070c9 0%, #0070c9 var(--seek-pct,0%), #3a3a3c var(--seek-pct,0%), #3a3a3c 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #0070c9 !important;
+  border: 2px solid #1c1c1e !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #ffffff, #e5e5ea) !important;
+  color: #1c1c1e !important;
+  border: 1px solid #c7c7cc !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12) !important;
+}
+.ctrl-btn:hover { filter: brightness(0.97); }
+.ctrl-btn.active { background: #0070c9 !important; color: #ffffff !important; border-color: #005fa0 !important; box-shadow: inset 0 1px 2px rgba(0,0,0,0.2) !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #ffffff, #e5e5ea) !important;
+  color: #1c1c1e !important;
+  border: 1px solid #c7c7cc !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12) !important;
+}
+
+#playlist-panel { background: #f5f5f7; border-left: 1px solid #c7c7cc; }
+#playlist-panel .pl-header { color: #636366; letter-spacing: 1px; }
+.pl-track { color: #3a3a3c; }
+.pl-track:hover { background: #e5e5ea; }
+.pl-track.active { color: #0070c9; font-weight: bold; }
+
+#dj-panel { background: linear-gradient(to bottom, #e8e8ea, #dcdcde); border-top: 1px solid #c7c7cc; }
+#dj-panel .dj-label { color: #636366; }
+#dj-panel .dj-value { color: #1c1c1e; font-weight: bold; }
+
+/* ── Remote ── */
+body { background: #f0f0f0; color: #1c1c1e; }
+#title { color: #0070c9; font-weight: bold; }
+#artist { color: #636366; }
+#transport button { background: linear-gradient(to bottom, #ffffff, #e5e5ea); color: #1c1c1e; border: 1px solid #c7c7cc !important; border-radius: 12px !important; box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important; }
+#transport button.big { background: linear-gradient(to bottom, #1a84ff, #0055cc) !important; color: #ffffff; box-shadow: 0 2px 6px rgba(0,112,201,0.3) !important; }
+.tr { background: #f5f5f7; border-radius: 8px; }
+.tr.active { background: #e5e5ea; }
+.tr .name.active { color: #0070c9; }
+#timers { background: #e8e8ea; border-radius: 10px; }
+#timers .tbtns button { background: linear-gradient(to bottom, #ffffff, #e5e5ea); color: #1c1c1e; border: 1px solid #c7c7cc !important; border-radius: 8px !important; }
+#shuffle.on { background: #0070c9 !important; color: #ffffff; }
