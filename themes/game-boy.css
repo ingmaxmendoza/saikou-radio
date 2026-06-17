@@ -1,0 +1,78 @@
+/* themes/game-boy.css — Game Boy DMG (4-shade olive) */
+:root {
+  --bg-primary: #9bbc0f;
+  --bg-secondary: #8bac0f;
+  --bg-panel: #8bac0f;
+  --bg-lcd: #0f380f;
+  --text-primary: #0f380f;
+  --text-secondary: #306230;
+  --text-accent: #0f380f;
+  --border-light: #9bbc0f;
+  --border-dark: #0f380f;
+  --btn-bg: #8bac0f;
+  --btn-text: #0f380f;
+  --font-ui: 'Courier New', monospace;
+  --font-mono: 'Courier New', monospace;
+}
+
+* { font-family: var(--font-ui) !important; border-radius: 0 !important; }
+
+body { background: #9bbc0f; color: #0f380f; }
+
+#titlebar { background: #8bac0f; border-bottom: 2px solid #0f380f; }
+#titlebar .logo { color: #0f380f; letter-spacing: 3px; font-weight: bold; }
+#titlebar .clock { color: #306230; }
+
+#lcd {
+  background: #0f380f;
+  color: #9bbc0f;
+  border: 2px solid #0f380f;
+  box-shadow: none;
+}
+#lcd .track-title { color: #9bbc0f; font-weight: bold; }
+#lcd .track-meta { color: #8bac0f !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #0f380f 0%, #0f380f var(--seek-pct,0%), #306230 var(--seek-pct,0%), #306230 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #0f380f !important;
+  border: 2px solid #9bbc0f !important;
+  box-shadow: none !important;
+}
+
+.ctrl-btn {
+  background: #8bac0f !important;
+  color: #0f380f !important;
+  border: 2px solid #0f380f !important;
+}
+.ctrl-btn:hover { background: #9bbc0f !important; }
+.ctrl-btn.active { background: #0f380f !important; color: #9bbc0f !important; border-color: #0f380f !important; }
+#open-btn, #settings-btn {
+  background: #8bac0f !important;
+  color: #0f380f !important;
+  border: 2px solid #0f380f !important;
+}
+
+#playlist-panel { background: #8bac0f; border-left: 2px solid #0f380f; }
+#playlist-panel .pl-header { color: #306230; letter-spacing: 2px; }
+.pl-track { color: #306230; }
+.pl-track:hover { background: #9bbc0f; color: #0f380f; }
+.pl-track.active { color: #0f380f; font-weight: bold; }
+
+#dj-panel { background: #8bac0f; border-top: 2px solid #0f380f; }
+#dj-panel .dj-label { color: #306230; }
+#dj-panel .dj-value { color: #0f380f; }
+
+/* ── Remote ── */
+body { background: #9bbc0f; color: #0f380f; }
+#title { color: #0f380f; font-weight: bold; }
+#artist { color: #306230; }
+#transport button { background: #8bac0f; color: #0f380f; border: 2px solid #0f380f !important; }
+#transport button.big { background: #0f380f !important; color: #9bbc0f; }
+.tr { background: #8bac0f; }
+.tr.active { background: #9bbc0f; border: 2px solid #0f380f; }
+.tr .name.active { color: #0f380f; }
+#timers { background: #8bac0f; }
+#timers .tbtns button { background: #8bac0f; color: #0f380f; border: 2px solid #0f380f !important; }
+#shuffle.on { background: #0f380f !important; color: #9bbc0f; }
