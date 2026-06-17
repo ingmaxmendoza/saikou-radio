@@ -14,3 +14,65 @@
   --font-ui: 'Courier New', monospace;
   --font-mono: 'Courier New', monospace;
 }
+
+#titlebar {
+  background: linear-gradient(to bottom, #0f1a20, #080f14);
+  border-bottom: 1px solid #00e5ff22;
+}
+#titlebar .logo { color: #00e5ff; letter-spacing: 3px; text-shadow: 0 0 10px #00e5ff88; }
+#titlebar .clock { color: #88ccdd; }
+
+#lcd {
+  background: #000810;
+  color: #00ffaa;
+  border: 1px solid #003344;
+  box-shadow: inset 0 0 12px rgba(0,229,255,0.08);
+}
+#lcd .track-title { color: #00e5ff; text-shadow: 0 0 6px #00e5ff66; }
+#lcd .track-meta { color: #88ccdd !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #00ffaa 0%, #00ffaa var(--seek-pct,0%), #003344 var(--seek-pct,0%), #003344 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #00ffaa !important;
+  border: 2px solid #000810 !important;
+  box-shadow: 0 0 6px #00ffaa88 !important;
+}
+
+.ctrl-btn {
+  background: #1a2a30 !important;
+  color: #00e5ff !important;
+  border: 1px solid #003344 !important;
+}
+.ctrl-btn:hover { border-color: #00e5ff66 !important; box-shadow: 0 0 4px #00e5ff33 !important; }
+.ctrl-btn.active { background: #00ffaa !important; color: #000810 !important; border-color: #00ffaa !important; }
+
+#open-btn, #settings-btn {
+  background: #1a2a30 !important;
+  color: #00e5ff !important;
+  border: 1px solid #003344 !important;
+}
+#open-btn:hover, #settings-btn:hover { border-color: #00e5ff66 !important; }
+
+#playlist-panel { background: #14141e; border-left: 1px solid #003344; }
+#playlist-panel .pl-header { color: #88ccdd; letter-spacing: 2px; }
+.pl-track { color: #88ccdd; }
+.pl-track:hover { background: #1a1a24; color: #00e5ff; }
+.pl-track.active { color: #00ffaa; font-weight: bold; text-shadow: 0 0 4px #00ffaa66; }
+
+#dj-panel { background: #0d0d12; border-top: 1px solid #003344; }
+#dj-panel .dj-label { color: #88ccdd; }
+#dj-panel .dj-value { color: #00e5ff; }
+
+/* ── Remote ── */
+body { background: #080f14; }
+#title { color: #00e5ff; text-shadow: 0 0 8px #00e5ff66; }
+#artist { color: #88ccdd; }
+#transport button { background: #1a2a30; color: #00e5ff; border: 1px solid #003344 !important; border-radius: 10px !important; }
+#transport button.big { background: #00ffaa !important; color: #000810; }
+.tr { background: #14141e; }
+.tr.active { background: #1a2a30; }
+.tr .name.active { color: #00ffaa; }
+#timers { background: #0d0d12; }
+#timers .tbtns button { background: #1a2a30; color: #00e5ff; border: 1px solid #003344 !important; border-radius: 8px !important; }
