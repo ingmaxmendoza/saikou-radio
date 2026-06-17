@@ -1,0 +1,86 @@
+/* themes/sakura.css — Sakura (soft pastel pink) */
+:root {
+  --bg-primary: #fff0f6;
+  --bg-secondary: #ffe3ef;
+  --bg-panel: #ffe8f3;
+  --bg-lcd: #3a2433;
+  --text-primary: #5a3a4a;
+  --text-secondary: #a07a8a;
+  --text-accent: #ff7fa8;
+  --border-light: #ffffff;
+  --border-dark: #e6b3cb;
+  --btn-bg: #ffd9e8;
+  --btn-text: #5a3a4a;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+body { background: #fff0f6; color: #5a3a4a; }
+
+#titlebar {
+  background: linear-gradient(to bottom, #ffe3ef, #ffd0e3);
+  border-bottom: 1px solid #e6b3cb;
+}
+#titlebar .logo { color: #5a3a4a; letter-spacing: 2px; }
+#titlebar .clock { color: #ff7fa8; }
+
+#lcd {
+  background: #3a2433;
+  color: #ff7fa8;
+  border: 1px solid #e6b3cb;
+  border-radius: 6px;
+  box-shadow: inset 0 0 10px rgba(255,127,168,0.18);
+}
+#lcd .track-title { color: #ffc8dd; }
+#lcd .track-meta { color: #c890a8 !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #ff7fa8 0%, #ff7fa8 var(--seek-pct,0%), #5a3a4a var(--seek-pct,0%), #5a3a4a 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #ff7fa8 !important;
+  border: 2px solid #3a2433 !important;
+  box-shadow: 0 0 4px rgba(255,127,168,0.5) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #ffe8f3, #ffd9e8) !important;
+  color: #5a3a4a !important;
+  border: 1px solid #ffffff !important;
+  border-right-color: #e6b3cb !important;
+  border-bottom-color: #e6b3cb !important;
+  border-radius: 6px !important;
+}
+.ctrl-btn:hover { filter: brightness(1.04); }
+.ctrl-btn.active { background: linear-gradient(to bottom, #ff7fa8, #ff6f9c) !important; color: #ffffff !important; border-color: #ff6f9c !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #ffe8f3, #ffd9e8) !important;
+  color: #5a3a4a !important;
+  border: 1px solid #ffffff !important;
+  border-right-color: #e6b3cb !important;
+  border-bottom-color: #e6b3cb !important;
+  border-radius: 6px !important;
+}
+
+#playlist-panel { background: #ffe8f3; border-left: 1px solid #e6b3cb; }
+#playlist-panel .pl-header { color: #a07a8a; letter-spacing: 1px; }
+.pl-track { color: #7a5a6a; }
+.pl-track:hover { background: #ffd9e8; color: #5a3a4a; }
+.pl-track.active { color: #ff6f9c; font-weight: bold; }
+
+#dj-panel { background: linear-gradient(to bottom, #ffe3ef, #ffd0e3); border-top: 1px solid #e6b3cb; }
+#dj-panel .dj-label { color: #a07a8a; }
+#dj-panel .dj-value { color: #ff6f9c; }
+
+/* ── Remote ── */
+body { background: #fff0f6; color: #5a3a4a; }
+#title { color: #ff6f9c; }
+#artist { color: #a07a8a; }
+#transport button { background: linear-gradient(to bottom, #ffe8f3, #ffd9e8); color: #5a3a4a; border: 1px solid #e6b3cb !important; border-radius: 10px !important; }
+#transport button.big { background: linear-gradient(to bottom, #ff7fa8, #ff6f9c) !important; color: #ffffff; }
+.tr { background: #ffe8f3; }
+.tr.active { background: #ffd9e8; }
+.tr .name.active { color: #ff6f9c; }
+#timers { background: #ffe3ef; }
+#timers .tbtns button { background: linear-gradient(to bottom, #ffe8f3, #ffd9e8); color: #5a3a4a; border: 1px solid #e6b3cb !important; border-radius: 8px !important; }
+#shuffle.on { background: linear-gradient(to bottom, #ff7fa8, #ff6f9c) !important; color: #ffffff; }
