@@ -19,8 +19,8 @@
   background: linear-gradient(to bottom, #e8e8ec 0%, #d8d8de 40%, #c8c8d0 60%, #d4d4dc 100%);
   border-bottom: 1px solid #9090a0;
 }
-#titlebar .logo { color: #111; letter-spacing: 2px; }
-#titlebar .clock { color: #555; }
+#titlebar .logo { color: #111111; letter-spacing: 2px; }
+#titlebar .clock { color: #555555; }
 
 #lcd {
   background: #1a1a2e;
@@ -42,7 +42,7 @@
 
 .ctrl-btn {
   background: linear-gradient(to bottom, #e8e8ec, #c8c8d0) !important;
-  color: #111 !important;
+  color: #111111 !important;
   border: 1px solid #ffffff !important;
   border-right-color: #9090a0 !important;
   border-bottom-color: #9090a0 !important;
@@ -52,7 +52,7 @@
 
 #open-btn, #settings-btn {
   background: linear-gradient(to bottom, #e8e8ec, #c8c8d0) !important;
-  color: #111 !important;
+  color: #111111 !important;
   border: 1px solid #ffffff !important;
   border-right-color: #9090a0 !important;
   border-bottom-color: #9090a0 !important;
@@ -74,4 +74,4 @@ body { background: #c0c0c8; }
 .tr.active { background: #c8c8d8; }
 .tr .name.active { color: #00e5ff; }
 #timers { background: #d4d4dc; }
-#timers .tbtns button { background: linear-gradient(to bottom, #e8e8ec, #c8c8d0); color: #111; border: 1px solid #9090a0 !important; border-radius: 8px !important; }
+#timers .tbtns button { background: linear-gradient(to bottom, #e8e8ec, #c8c8d0); color: #111111; border: 1px solid #9090a0 !important; border-radius: 8px !important; }
