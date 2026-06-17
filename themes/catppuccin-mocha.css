@@ -1,0 +1,64 @@
+/* themes/catppuccin-mocha.css — Catppuccin Mocha */
+:root {
+  --bg-primary: #1e1e2e;
+  --bg-secondary: #313244;
+  --bg-panel: #181825;
+  --bg-lcd: #11111b;
+  --text-primary: #cdd6f4;
+  --text-secondary: #a6adc8;
+  --text-accent: #cba6f7;
+  --border-light: #45475a;
+  --border-dark: #313244;
+  --btn-bg: #313244;
+  --btn-text: #cdd6f4;
+  --font-ui: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+}
+
+body { background: #1e1e2e; color: #cdd6f4; }
+
+#titlebar { background: #181825; border-bottom: 1px solid #313244; }
+#titlebar .logo { color: #cba6f7; letter-spacing: 2px; }
+#titlebar .clock { color: #a6adc8; }
+
+#lcd { background: #11111b; color: #cba6f7; border: 1px solid #313244; }
+#lcd .track-title { color: #cdd6f4; }
+#lcd .track-meta { color: #a6adc8 !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #cba6f7 0%, #cba6f7 var(--seek-pct,0%), #313244 var(--seek-pct,0%), #313244 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #cba6f7 !important;
+  border: 2px solid #11111b !important;
+  box-shadow: none !important;
+}
+
+.ctrl-btn { background: #313244 !important; color: #cdd6f4 !important; border: 1px solid #45475a !important; }
+.ctrl-btn:hover { background: #45475a !important; }
+.ctrl-btn.active { background: #cba6f7 !important; color: #1e1e2e !important; border-color: #cba6f7 !important; }
+#open-btn, #settings-btn { background: #313244 !important; color: #cdd6f4 !important; border: 1px solid #45475a !important; }
+#open-btn:hover, #settings-btn:hover { background: #45475a !important; }
+
+#playlist-panel { background: #181825; border-left: 1px solid #313244; }
+#playlist-panel .pl-header { color: #a6adc8; letter-spacing: 1px; }
+.pl-track { color: #a6adc8; }
+.pl-track:hover { background: #313244; color: #cdd6f4; }
+.pl-track.active { color: #cba6f7; font-weight: bold; }
+
+#dj-panel { background: #181825; border-top: 1px solid #313244; }
+#dj-panel .dj-label { color: #a6adc8; }
+#dj-panel .dj-value { color: #cba6f7; }
+
+/* ── Remote ── */
+body { background: #1e1e2e; }
+#title { color: #cba6f7; }
+#artist { color: #a6adc8; }
+#transport button { background: #313244; color: #cdd6f4; border: 1px solid #45475a !important; border-radius: 12px !important; }
+#transport button.big { background: #cba6f7 !important; color: #1e1e2e; }
+.tr { background: #181825; }
+.tr.active { background: #313244; }
+.tr .name.active { color: #cba6f7; }
+#timers { background: #11111b; }
+#timers .tbtns button { background: #313244; color: #cdd6f4; border: 1px solid #45475a !important; border-radius: 8px !important; }
+#shuffle.on { background: #cba6f7 !important; color: #1e1e2e; }
