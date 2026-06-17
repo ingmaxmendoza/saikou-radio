@@ -23,6 +23,7 @@ function parseCommand(body) {
 }
 
 const REMOTE_DIR = path.join(__dirname, '../renderer/remote')
+const THEMES_DIR = path.join(__dirname, '../themes')
 const STATIC = {
   '/':           { file: 'index.html', type: 'text/html; charset=utf-8' },
   '/index.html': { file: 'index.html', type: 'text/html; charset=utf-8' },
@@ -37,6 +38,13 @@ class RemoteServer {
     this._clients = new Set()
     this._lastState = {}
     this._port = 7000
+    this._themeName = 'dark-lcd'
+    this._customThemePath = null
+  }
+
+  setTheme(name, customPath) {
+    this._themeName = name || 'dark-lcd'
+    this._customThemePath = customPath || null
   }
 
   isRunning() { return !!this._server }
@@ -68,7 +76,9 @@ class RemoteServer {
   _handle(req, res) {
     const url = (req.url || '/').split('?')[0]
     if (req.method === 'GET' && url === '/api/events') return this._sse(req, res)
+    if (req.method === 'GET' && url === '/api/state') return this._state(res)
     if (req.method === 'POST' && url === '/api/command') return this._command(req, res)
+    if (req.method === 'GET' && url === '/theme.css') return this._serveThemeCss(res)
     if (req.method === 'GET' && STATIC[url]) return this._static(res, STATIC[url])
     res.writeHead(404); res.end('Not found')
   }
@@ -90,6 +100,21 @@ class RemoteServer {
     res.write(`data: ${JSON.stringify(this._lastState)}\n\n`)
     this._clients.add(res)
     req.on('close', () => { this._clients.delete(res) })
+  }
+
+  _state(res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify(this._lastState))
+  }
+
+  _serveThemeCss(res) {
+    const filePath = (this._themeName === 'custom' && this._customThemePath)
+      ? this._customThemePath
+      : path.join(THEMES_DIR, `${this._themeName || 'dark-lcd'}.css`)
+    fs.readFile(filePath, (err, data) => {
+      res.writeHead(200, { 'Content-Type': 'text/css; charset=utf-8' })
+      res.end(err ? '' : data)
+    })
   }
 
   _command(req, res) {
