@@ -41,6 +41,58 @@ Windows only for now.
 
 ---
 
+## Creating .m3u Playlists (for testers)
+
+An `.m3u` file is a plain text file that lists audio file paths, one per line. You can create one in any text editor — just save it with the `.m3u` extension.
+
+**Basic format:**
+
+```
+#EXTM3U
+
+#EXTINF:213,Artist Name - Track Title
+C:\Music\artist_name - track_title.mp3
+
+#EXTINF:180,Another Artist - Another Track
+C:\Music\another_artist - another_track.mp3
+```
+
+- `#EXTM3U` — header line, required once at the top
+- `#EXTINF:<duration in seconds>,<Artist> - <Title>` — metadata for the next track (the DJ reads this)
+- The line after `#EXTINF` is the file path to the audio file
+
+**Minimal format (no metadata):**
+
+If you just want something quick, `#EXTINF` lines are optional. A bare list of paths works too:
+
+```
+C:\Music\song1.mp3
+C:\Music\song2.mp3
+C:\Music\song3.mp3
+```
+
+The DJ will still speak the filename as the track name, just without artist info.
+
+**Tips for testers:**
+
+- Paths can be absolute (`C:\Music\song.mp3`) or relative to the `.m3u` file's location (`songs\song.mp3`)
+- Supported formats: `.mp3`, `.flac`, `.wav`, `.ogg`, `.aac`, `.m4a`
+- Put multiple `.m3u` files in one folder and point **Settings → Playlists Library** at that folder to load them all at once
+- The DJ reads artist and title from the `#EXTINF` line — fill these in for the best experience
+
+**Quick way to generate one on Windows:**
+
+Open PowerShell in your music folder and run:
+
+```powershell
+"#EXTM3U" | Out-File -Encoding utf8 my_playlist.m3u
+Get-ChildItem -Filter *.mp3 | ForEach-Object { "#EXTINF:-1,$($_.BaseName)`n$($_.FullName)" } | Out-File -Encoding utf8 -Append my_playlist.m3u
+```
+
+This creates `my_playlist.m3u` with every `.mp3` in the folder.
+
+---
+
 ## Running from Source
 
 ```bash
