@@ -174,18 +174,7 @@
     #dj-panel .dj-item { display: flex; gap: 5px; }
     #dj-panel .dj-label { color: var(--text-secondary, #555); }
     #dj-panel .dj-value { font-weight: bold; }
-    #settings-btn {
-      margin-left: auto;
-      background: var(--btn-bg, #d0d0d8);
-      color: var(--btn-text, #111);
-      border: 2px solid var(--border-light, #fff);
-      border-right-color: var(--border-dark, #888);
-      border-bottom-color: var(--border-dark, #888);
-      padding: 3px 8px;
-      cursor: pointer;
-      font-family: var(--font-ui);
-      font-size: 10px;
-    }
+    #settings-btn { margin-left: auto; }
     #mini-btn, #fullscreen-btn, #remote-btn, #timers-btn, #library-btn {
       background: var(--btn-bg, #d0d0d8);
       color: var(--btn-text, #111);
@@ -477,7 +466,7 @@
       <div class="dj-item">
         <span class="dj-label" id="dj-status"></span>
       </div>
-      <button id="settings-btn">Settings</button>
+      <button class="ctrl-btn" id="settings-btn">STNG</button>
       <button id="library-btn" title="Library">LIB</button>
       <button id="timers-btn" title="Timers">TMR</button>
       <button id="remote-btn" title="Phone remote">RMT</button>
