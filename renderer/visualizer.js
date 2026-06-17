@@ -250,7 +250,7 @@ class VisualizerEngine {
         const peakSeg = Math.round(peak * segments)
         const isPeak = (segments - s) === peakSeg
         let color
-        if (s < 2) color = '#ff4444'
+        if (s < 2) color = this._colors.accent
         else if (s < 5) color = '#ffaa00'
         else color = this._colors.accent
         ctx.globalAlpha = (lit || isPeak) ? 1 : 0.12

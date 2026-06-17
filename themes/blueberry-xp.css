@@ -115,7 +115,7 @@ body { background: #1e2e5e; }
 }
 #transport button:active { filter: brightness(0.85); }
 .tr { background: #1e2e5e; border-radius: 8px; }
-.tr.active { background: #2a3a8e; border: 1px solid #3a5ab866; }
+.tr.active { background: #2a3a8e; border: 1px solid rgba(58,90,184,0.4); }
 .tr .name.active { color: #66aaff; }
 #timers { background: #162048; border-radius: 10px; }
 #timers .tbtns button {
