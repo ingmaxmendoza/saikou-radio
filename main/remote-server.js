@@ -100,6 +100,8 @@ class RemoteServer {
     res.write(`data: ${JSON.stringify(this._lastState)}\n\n`)
     this._clients.add(res)
     req.on('close', () => { this._clients.delete(res) })
+    // Ask the renderer for a fresh state push so new clients get current data immediately
+    try { this._onCommand({ action: 'request-state' }) } catch {}
   }
 
   _state(res) {
