@@ -1,4 +1,4 @@
-/* themes/win98.css — Classic Windows 98 look, relies on 98.css as base */
+/* themes/win98.css — Classic Windows 98 */
 :root {
   --bg-primary: #c0c0c0;
   --bg-secondary: #c0c0c0;
@@ -15,14 +15,12 @@
   --font-mono: 'Fixedsys', 'Courier New', monospace;
 }
 
-body {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: var(--font-ui);
-  font-size: 11px;
-}
+/* ── Force Win98 font + no border-radius anywhere ── */
+* { font-family: var(--font-ui) !important; border-radius: 0 !important; }
 
-/* Titlebar as Win98 active window caption */
+body { background: #c0c0c0; color: #000000; font-size: 11px; }
+
+/* ── Titlebar ── */
 #titlebar {
   background: linear-gradient(to right, #000080, #1084d0);
   color: #ffffff;
@@ -32,55 +30,19 @@ body {
 #titlebar .logo { color: #ffffff; font-weight: bold; }
 #titlebar .clock { color: #ffffff; }
 
-/* LCD panel uses navy like a Win98 active title / DOS window */
+/* ── LCD — navy like a Win98 DOS/title window ── */
 #lcd {
   background: #000080;
   color: #ffffff;
-  border: inset 2px;
-  font-family: var(--font-mono);
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
 }
-#lcd .track-title {
-  color: #ffffff;
-  font-size: 13px;
-  font-family: var(--font-ui);
-  font-weight: bold;
-}
-#lcd .track-meta {
-  color: #ffffff !important;
-  opacity: 0.85;
-  font-family: var(--font-ui);
-  font-size: 10px;
-}
+#lcd .track-title { color: #ffffff; font-size: 13px; font-weight: bold; }
+#lcd .track-meta { color: #ffffff !important; opacity: 0.85; font-size: 10px; }
 
-/* Playlist panel */
-#playlist-panel { background: #ffffff; border: inset 2px; }
-#playlist-panel .pl-header { color: #000080; }
-.pl-track:hover { background: #000080; color: #ffffff; }
-.pl-track.active { background: #000080; color: #ffffff; font-weight: bold; }
-
-/* DJ panel */
-#dj-panel {
-  background: #c0c0c0;
-  border-top: 2px solid #808080;
-}
-#dj-panel .dj-label { color: #444; }
-
-/* Force Win98 font everywhere */
-* { font-family: var(--font-ui) !important; }
-#lcd, #lcd .track-title, #lcd .track-meta { font-family: var(--font-ui) !important; }
-
-/* Buttons — 98.css handles the bevel, we just set colors */
-.ctrl-btn, #open-btn, #settings-btn {
-  font-size: 11px;
-}
-.ctrl-btn.active,
-body .ctrl-btn.active {
-  background: #000080 !important;
-  color: #ffffff !important;
-  border-color: #808080 !important;
-}
-
-/* Seek slider */
+/* ── Seek slider ── */
 #seek-slider {
   background: linear-gradient(to right, #000080 0%, #000080 var(--seek-pct, 0%), #808080 var(--seek-pct, 0%), #808080 100%) !important;
 }
@@ -90,16 +52,98 @@ body .ctrl-btn.active {
   box-shadow: none !important;
 }
 
+/* ── Ctrl buttons — already get bevel from CSS vars ── */
+.ctrl-btn { font-size: 11px; }
+.ctrl-btn.active {
+  background: #000080 !important;
+  color: #ffffff !important;
+}
+
+/* ── Playlist panel — inset box ── */
+#playlist-panel {
+  background: #ffffff;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+}
+#playlist-panel .pl-header { color: #000080; }
+.pl-track:hover { background: #000080; color: #ffffff; }
+.pl-track.active { background: #000080; color: #ffffff; font-weight: bold; }
+
+/* ── DJ panel ── */
+#dj-panel { background: #c0c0c0; border-top: 2px solid #808080; }
+#dj-panel .dj-label { color: #444; }
+
+/* ── Overlay cards — Win98 dialog look ── */
+#timers-card, #library-card {
+  background: #c0c0c0 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  box-shadow: 2px 2px 0 #000000 !important;
+}
+#timers-card h3, #library-card h3 {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: #ffffff;
+  padding: 2px 6px;
+  margin: -16px -20px 10px -20px;
+  font-size: 11px;
+}
+#timers-card button, #timers-close, #library-close {
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  box-shadow: none !important;
+}
+#library-list .lib-item {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #808080 !important;
+}
+#library-list .lib-item:hover { background: #000080 !important; color: #ffffff !important; }
+
 /* ── Remote ── */
 body { background: #c0c0c0; color: #000000; }
 #title { color: #ffffff; font-weight: bold; }
 #artist { color: #cccccc; }
-#transport button { background: #c0c0c0; color: #000000; border: 2px solid #ffffff !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; border-radius: 0 !important; }
-#transport button.big { background: #000080 !important; color: #ffffff; border: 2px solid #ffffff !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; }
-#transport button:active { border-color: #808080 !important; border-right-color: #ffffff !important; border-bottom-color: #ffffff !important; }
-.tr { background: #ffffff; border-radius: 0; }
+#transport button {
+  background: #c0c0c0;
+  color: #000000;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+}
+#transport button.big {
+  background: #c0c0c0 !important;
+  color: #000000 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  font-weight: bold;
+}
+#transport button:active, #transport button.big:active {
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+}
+.tr { background: #ffffff; border: 1px solid #808080 !important; }
 .tr.active { background: #000080; }
 .tr .name.active { color: #ffffff; }
-#timers { background: #c0c0c0; border-radius: 0; }
-#timers .tbtns button { background: #c0c0c0; color: #000000; border: 2px solid #ffffff !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; border-radius: 0 !important; }
+#timers { background: #c0c0c0; border: 1px solid #808080 !important; }
+#timers .tbtns button {
+  background: #c0c0c0;
+  color: #000000;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+}
 #shuffle.on { background: #000080 !important; color: #ffffff; }
