@@ -52,8 +52,10 @@ body { background: #c0c0c0; color: #000000; font-size: 11px; }
   box-shadow: none !important;
 }
 
-/* ── Ctrl buttons — already get bevel from CSS vars ── */
-.ctrl-btn { font-size: 11px; }
+/* ── All buttons get Win98 bevel ── */
+.ctrl-btn, #settings-btn, #library-btn, #timers-btn, #remote-btn, #fullscreen-btn, #mini-btn {
+  font-size: 11px;
+}
 .ctrl-btn.active {
   background: #000080 !important;
   color: #ffffff !important;
