@@ -22,7 +22,7 @@ function renderTimers() {
 }
 
 function renderTick() {
-  $('play').textContent = state.isPlaying ? '❚❚' : '▶'
+  $('play').textContent = state.isPlaying ? '||' : '>'
   if (!seekDragging) {
     const frac = state.duration ? state.elapsed / state.duration : 0
     $('seek').value = Math.round(frac * 1000)
@@ -81,6 +81,13 @@ function renderFull() {
   renderPlaylist(); renderQueue(); renderTick(); renderTimers()
 }
 
+function pollState() {
+  fetch('/api/state')
+    .then((r) => r.json())
+    .then((msg) => { Object.assign(state, msg); renderFull() })
+    .catch(() => {})
+}
+
 function connect() {
   const es = new EventSource('/api/events')
   es.onmessage = (e) => {
@@ -89,8 +96,12 @@ function connect() {
     if (msg.type === 'tick') { Object.assign(state, msg); renderTick() }
     else { Object.assign(state, msg); renderFull() }
   }
-  es.onerror = () => { /* EventSource auto-reconnects */ }
+  es.onerror = () => { /* EventSource auto-reconnects; poll to re-sync */ pollState() }
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') pollState()
+})
 
 $('play').onclick = () => post('toggle')
 $('prev').onclick = () => post('prev')

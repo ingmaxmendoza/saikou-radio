@@ -30,6 +30,7 @@ function applyRemoteSetting(s) {
       })
     }
     if (!remoteServer.isRunning()) remoteServer.start(s.remotePort || 7000)
+    remoteServer.setTheme(s.theme || 'dark-lcd', s.customThemePath || null)
   } else if (remoteServer && remoteServer.isRunning()) {
     remoteServer.stop()
   }
