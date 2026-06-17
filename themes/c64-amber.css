@@ -1,0 +1,69 @@
+/* themes/c64-amber.css — Commodore 64 */
+:root {
+  --bg-primary: #4040a0;
+  --bg-secondary: #3030b0;
+  --bg-panel: #2828a0;
+  --bg-lcd: #1818a8;
+  --text-primary: #e8a030;
+  --text-secondary: #c08020;
+  --text-accent: #7edfff;
+  --border-light: #c0c0ff;
+  --border-dark: #2020a0;
+  --btn-bg: #3030b0;
+  --btn-text: #e8a030;
+  --font-ui: 'Courier New', 'Lucida Console', monospace;
+  --font-mono: 'Courier New', monospace;
+}
+
+* { font-family: var(--font-ui) !important; }
+
+body { background: #4040a0; color: #e8a030; }
+
+#titlebar { background: #1818a8; border-bottom: 2px solid #7edfff; }
+#titlebar .logo { color: #7edfff; letter-spacing: 4px; text-shadow: 0 0 4px #7edfff66; }
+#titlebar .clock { color: #c08020; }
+
+#lcd {
+  background: #1818a8;
+  color: #e8a030;
+  border: 2px solid #7edfff;
+  text-shadow: 0 0 4px #e8a03066;
+}
+#lcd .track-title { color: #e8a030; }
+#lcd .track-meta { color: #c08020 !important; text-shadow: none; }
+
+#seek-slider {
+  background: linear-gradient(to right, #e8a030 0%, #e8a030 var(--seek-pct,0%), #2020a0 var(--seek-pct,0%), #2020a0 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #e8a030 !important;
+  border: 2px solid #1818a8 !important;
+  box-shadow: 0 0 4px #e8a03088 !important;
+}
+
+.ctrl-btn { background: #3030b0 !important; color: #e8a030 !important; border: 1px solid #7edfff88 !important; }
+.ctrl-btn:hover { border-color: #7edfff !important; }
+.ctrl-btn.active { background: #7edfff !important; color: #1818a8 !important; border-color: #7edfff !important; }
+#open-btn, #settings-btn { background: #3030b0 !important; color: #e8a030 !important; border: 1px solid #7edfff88 !important; }
+
+#playlist-panel { background: #2828a0; border-left: 1px solid #2020a0; }
+#playlist-panel .pl-header { color: #7edfff; letter-spacing: 2px; }
+.pl-track { color: #c08020; }
+.pl-track:hover { background: #3030b0; color: #e8a030; }
+.pl-track.active { color: #7edfff; font-weight: bold; }
+
+#dj-panel { background: #3030b0; border-top: 1px solid #2020a0; }
+#dj-panel .dj-label { color: #c08020; }
+#dj-panel .dj-value { color: #e8a030; }
+
+/* ── Remote ── */
+body { background: #1818a8; color: #e8a030; }
+#title { color: #e8a030; text-shadow: 0 0 6px #e8a03088; }
+#artist { color: #c08020; }
+#transport button { background: #3030b0; color: #e8a030; border: 1px solid #7edfff66 !important; border-radius: 8px !important; }
+#transport button.big { background: #7edfff !important; color: #1818a8; }
+.tr { background: #2828a0; }
+.tr.active { background: #3030b0; border: 1px solid #7edfff44; }
+.tr .name.active { color: #7edfff; }
+#timers { background: #1818a8; }
+#timers .tbtns button { background: #3030b0; color: #e8a030; border: 1px solid #7edfff44 !important; border-radius: 8px !important; }
