@@ -35,7 +35,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 2.2.1 |
+| Version | 2.2.2 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -963,6 +963,7 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | 2.1.0 | Multi-playlist support, library folder, queue-aware DJ, playlist source naming |
 | 2.2.0 | Saikou app icon (PNG), emoji → ASCII UI buttons, themed remote applet, remote sync fix |
 | 2.2.1 | Proper `.ico` icon file wired into BrowserWindow and electron-builder |
+| 2.2.2 | Fix: remote applet requests fresh state on SSE connect so data loads immediately |
 
 ---
 

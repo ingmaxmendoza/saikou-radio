@@ -25,7 +25,8 @@ Grab the latest installer from [Releases](https://github.com/ingmaxmendoza/saiko
 
 | Version | Notes |
 |---------|-------|
-| **v2.2.1** | Saikou icon (`.ico`), ASCII UI (no emoji), themed phone remote, remote sync fix |
+| **v2.2.2** | Fix: remote applet now loads track/playlist/art on connect without needing to interact first |
+| v2.2.1 | Saikou icon (`.ico`), ASCII UI (no emoji), themed phone remote, remote sync fix |
 | v2.1.0 | Multi-playlist library folder, queue-aware DJ, source naming |
 | v1.1.1 | Patch |
 | v1.1.0 | — |
