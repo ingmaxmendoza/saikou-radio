@@ -1,6 +1,6 @@
 // renderer/visualizer.js
 
-const STYLE_NAMES = ['bars', 'scope', 'radial', 'particles']
+const STYLE_NAMES = ['bars', 'scope', 'radial', 'particles', 'waterfall', 'vu', 'starfield', 'plasma', 'aurora']
 
 function nextStyleName(current, list = STYLE_NAMES) {
   const i = list.indexOf(current)
@@ -28,6 +28,16 @@ class VisualizerEngine {
     this._colors = { accent: '#00e5ff', dim: '#88ccdd', bg: '#1a1a2e' }
     this._artImg = null
     this.refreshColors()
+    this._vuLevels = [0, 0]
+    this._vuPeaks = [0, 0]
+    this._stars = Array.from({ length: 150 }, () => ({
+      x: (Math.random() - 0.5) * 2,
+      y: (Math.random() - 0.5) * 2,
+      z: Math.random(),
+      px: 0, py: 0,
+    }))
+    this._plasmaTime = 0
+    this._auroraHistory = []
   }
 
   setArt(dataUrl) {
