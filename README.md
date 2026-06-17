@@ -12,7 +12,9 @@ Built with Electron.
 - **Text-to-speech** — uses Microsoft Edge TTS (natural-sounding voices) with a SAPI fallback
 - **Multi-playlist support** — point Saikou at a folder full of `.m3u` files and load them all at once
 - **No-repeat smart shuffle** — tracks won't repeat until the whole deck has played
-- **Y2K aesthetic** — silver brushed-metal UI inspired by Windows XP and early iTunes
+- **Y2K aesthetic** — six built-in themes (Y2K Silver, Dark LCD, Blueberry XP, Win98, Green Terminal, White on Black) plus custom CSS support
+- **Phone remote** — control playback from any phone on the same Wi-Fi, themed to match the desktop
+- **Timers** — Pomodoro timer and sleep timer with bilingual TTS announcements
 - **Customizable** — edit the DJ's personality phrases, pick your TTS voice, set the break interval
 
 ---
@@ -23,7 +25,8 @@ Grab the latest installer from [Releases](https://github.com/ingmaxmendoza/saiko
 
 | Version | Notes |
 |---------|-------|
-| **v2.1.0** | Multi-playlist library folder, queue-aware DJ, source naming |
+| **v2.2.1** | Saikou icon (`.ico`), ASCII UI (no emoji), themed phone remote, remote sync fix |
+| v2.1.0 | Multi-playlist library folder, queue-aware DJ, source naming |
 | v1.1.1 | Patch |
 | v1.1.0 | — |
 | v1.0.0 | Initial release |
