@@ -97,6 +97,8 @@ class VisualizerEngine {
     if (this._style === 'scope') this._drawScope(analyser, W, H)
     else if (this._style === 'radial') this._drawRadial(analyser, W, H)
     else if (this._style === 'particles') this._drawParticles(analyser, W, H)
+    else if (this._style === 'waterfall') this._drawWaterfall(analyser, W, H)
+    else if (this._style === 'vu') this._drawVU(analyser, W, H)
     else this._drawBars(analyser, W, H)
   }
 
@@ -189,6 +191,72 @@ class VisualizerEngine {
       ctx.fillStyle = g
       ctx.beginPath(); ctx.arc(xx, yy, r * 3, 0, Math.PI * 2); ctx.fill()
     }
+    ctx.globalAlpha = 1
+  }
+
+  _drawWaterfall(analyser, W, H) {
+    // Lazy-create/resize offscreen canvas
+    if (!this._waterfallCanvas || this._waterfallCanvas.width !== W || this._waterfallCanvas.height !== H) {
+      this._waterfallCanvas = document.createElement('canvas')
+      this._waterfallCtx = this._waterfallCanvas.getContext('2d')
+      this._waterfallCanvas.width = W
+      this._waterfallCanvas.height = H
+    }
+    const wCtx = this._waterfallCtx
+    // Shift existing content down 1 pixel
+    wCtx.drawImage(this._waterfallCanvas, 0, 1)
+    // Paint new frequency strip at top row
+    const data = this._freq(analyser)
+    const sliceW = W / data.length
+    for (let i = 0; i < data.length; i++) {
+      const v = data[i] / 255
+      if (v < 0.01) continue
+      wCtx.fillStyle = v > 0.75 ? this._colors.accent : this._colors.dim
+      wCtx.globalAlpha = v * v
+      wCtx.fillRect(Math.floor(i * sliceW), 0, Math.ceil(sliceW), 1)
+    }
+    wCtx.globalAlpha = 1
+    this._ctx.drawImage(this._waterfallCanvas, 0, 0)
+  }
+
+  _drawVU(analyser, W, H) {
+    const data = this._freq(analyser)
+    // Compute RMS level from full spectrum
+    let sum = 0
+    for (let i = 0; i < data.length; i++) sum += (data[i] / 255) ** 2
+    const rms = Math.sqrt(sum / data.length)
+    const target = Math.min(1, rms * 2.2)
+    // Smooth and decay
+    this._vuLevels[0] += (target - this._vuLevels[0]) * 0.4
+    this._vuLevels[1] = this._vuLevels[0]
+    this._vuPeaks[0] = Math.max(this._vuPeaks[0] - 0.008, this._vuLevels[0])
+    this._vuPeaks[1] = this._vuPeaks[0]
+
+    const ctx = this._ctx
+    const segments = 20
+    const barW = Math.floor(W * 0.28)
+    const barH = Math.floor(H * 0.82)
+    const segH = barH / segments
+    const gap = Math.max(1, Math.floor(segH * 0.18))
+    const topY = Math.floor((H - barH) / 2)
+
+    const drawBar = (x, level, peak) => {
+      for (let s = 0; s < segments; s++) {
+        const segLevel = (segments - s) / segments
+        const lit = level >= segLevel
+        const peakSeg = Math.round(peak * segments)
+        const isPeak = (segments - s) === peakSeg
+        let color
+        if (s < 2) color = '#ff4444'
+        else if (s < 5) color = '#ffaa00'
+        else color = this._colors.accent
+        ctx.globalAlpha = (lit || isPeak) ? 1 : 0.12
+        ctx.fillStyle = (lit || isPeak) ? color : this._colors.dim
+        ctx.fillRect(x, topY + s * segH, barW, segH - gap)
+      }
+    }
+    drawBar(Math.floor(W * 0.08), this._vuLevels[0], this._vuPeaks[0])
+    drawBar(Math.floor(W * 0.64), this._vuLevels[1], this._vuPeaks[1])
     ctx.globalAlpha = 1
   }
 }
