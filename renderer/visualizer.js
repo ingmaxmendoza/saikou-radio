@@ -101,6 +101,7 @@ class VisualizerEngine {
     else if (this._style === 'vu') this._drawVU(analyser, W, H)
     else if (this._style === 'starfield') this._drawStarfield(analyser, W, H)
     else if (this._style === 'plasma') this._drawPlasma(analyser, W, H)
+    else if (this._style === 'aurora') this._drawAurora(analyser, W, H)
     else this._drawBars(analyser, W, H)
   }
 
@@ -345,6 +346,40 @@ class VisualizerEngine {
     }
     offCtx.putImageData(imgData, 0, 0)
     this._ctx.drawImage(this._plasmaOff, 0, 0, W, H)
+  }
+
+  _drawAurora(analyser, W, H) {
+    const buf = new Uint8Array(analyser.fftSize)
+    analyser.getByteTimeDomainData(buf)
+    // Snapshot current waveform as floats in [-0.5, 0.5]
+    const snap = new Float32Array(buf.length)
+    for (let i = 0; i < buf.length; i++) snap[i] = buf[i] / 255 - 0.5
+    this._auroraHistory.push(snap)
+    if (this._auroraHistory.length > 6) this._auroraHistory.shift()
+
+    const ctx = this._ctx
+    const layers = this._auroraHistory.length
+    const midY = H / 2
+
+    for (let li = 0; li < layers; li++) {
+      const wave = this._auroraHistory[li]
+      const age = (li + 1) / layers   // 0→1: oldest→newest
+      const slice = W / wave.length
+      ctx.globalAlpha = 0.1 + age * 0.85
+      ctx.lineWidth = 1 + age * 3
+      ctx.strokeStyle = li % 2 === 0 ? this._colors.accent : this._colors.dim
+      ctx.shadowBlur = age * 14
+      ctx.shadowColor = this._colors.accent
+      ctx.beginPath()
+      for (let i = 0; i < wave.length; i++) {
+        const x = i * slice
+        const y = midY + wave[i] * H * 0.42
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+      }
+      ctx.stroke()
+    }
+    ctx.globalAlpha = 1
+    ctx.shadowBlur = 0
   }
 }
 
