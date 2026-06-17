@@ -35,7 +35,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 2.1.0 |
+| Version | 2.2.1 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -105,7 +105,8 @@ saikou/
 │   ├── white-on-black.css
 │   └── green-terminal.css
 ├── assets/
-│   └── icon.png          # App icon (used for installer + taskbar)
+│   ├── icon.ico          # App icon — Windows native format (installer + exe resources)
+│   └── icon.png          # App icon — PNG fallback (album art placeholder)
 ├── tests/
 │   └── dj.test.js        # Jest tests for buildDJScript
 ├── package.json
@@ -126,6 +127,7 @@ mainWindow = new BrowserWindow({
   width: 760, height: 440,
   resizable: false,
   frame: false,           // removes all native chrome
+  icon: path.join(__dirname, '../assets/icon.ico'),
   webPreferences: {
     nodeIntegration: true,
     contextIsolation: false,
@@ -519,9 +521,13 @@ A Node `http` server (no extra transport dependencies) with three route groups:
 - `GET /` → serves `renderer/remote/index.html`
 - `GET /remote.js` → serves `renderer/remote/remote.js`
 - `GET /remote.css` → serves `renderer/remote/remote.css`
+- `GET /theme.css` → serves the active desktop theme CSS from `themes/<name>.css` (or the custom path); loaded by the remote applet so colors match the desktop
 
 **Event stream (SSE):**
 - `GET /api/events` → Server-Sent Events stream. On connect, sends the cached full state `{type:'state',...}` with album art and metadata. After that, broadcasts full states on change and lightweight ticks (`{type:'tick',elapsed,duration,isPlaying,volume}`) approximately every second. Phone merges ticks into the last received full state.
+
+**State snapshot:**
+- `GET /api/state` → Returns the last cached state as JSON. Used by the remote applet to re-sync on SSE reconnect and on tab visibility change (prevents drift when the page was backgrounded).
 
 **Command endpoint:**
 - `POST /api/command` → Parses `{action,...}` JSON and invokes the `onCommand` callback, which relays to the renderer via IPC.
@@ -534,6 +540,7 @@ A Node `http` server (no extra transport dependencies) with three route groups:
 - `start(port)` — Binds server to 0.0.0.0 and the given port (default 7000)
 - `stop()` — Closes server and all SSE connections
 - `broadcastState(state)` — Sends state to all connected clients
+- `setTheme(name, customPath)` — Updates the active theme served at `/theme.css`; called by `ipc.js` on every settings save and at startup
 - `getUrl()` — Returns `http://<LAN-IP>:<port>`
 - `isRunning()` — Returns whether server is active
 
@@ -579,9 +586,17 @@ Located in `renderer/remote/` (index.html, remote.css, remote.js). Mobile-optimi
 
 Simple FIFO queue helper. `nextFromQueue(queue)` shifts and returns the first item. In `app.js`, `playNext()` checks the queue before normal/shuffle advance.
 
+### Remote Applet Theme Support (V2.2)
+
+The phone UI inherits the active desktop theme via the `/theme.css` endpoint. `remote.css` is written entirely in CSS custom properties (`--bg-lcd`, `--text-accent`, `--btn-bg`, etc.) with dark fallbacks — the same variables the six built-in themes already define. When the user changes themes in Settings, `ipc.js` calls `remoteServer.setTheme()` immediately; the next page load or reload reflects the new theme.
+
+**Sync fix:** The phone client polls `/api/state` on SSE error (reconnect) and on `document.visibilitychange` (tab returning to foreground). This prevents the remote from drifting behind when the browser tab was backgrounded.
+
+**Transport buttons** use ASCII (`|<`, `>`, `>|`, `||`) instead of Unicode symbols.
+
 ### Desktop Connect Panel
 
-The `📱` button opens an overlay showing the LAN URL and a QR code (generated via the optional `qrcode` dependency; if unavailable, the URL displays as plain text). Clicking the overlay or the X button closes it.
+The `RMT` button opens an overlay showing the LAN URL and a QR code (generated via the optional `qrcode` dependency; if unavailable, the URL displays as plain text). Clicking the overlay or the X button closes it.
 
 ---
 
@@ -610,7 +625,7 @@ Pure state machine via `nextPomodoroPhase(current, completedFocus, longEvery)`: 
 
 ### Desktop Timers UI
 
-The `⏱` button opens a timers overlay with controls:
+The `TMR` button opens a timers overlay with controls:
 - **Sleep:** Off, 15, 30, 60, 90 minutes (live `#sleep-display` shows remaining time)
 - **Pomodoro:** Start, Pause, Skip, Reset buttons (live `#pomo-display` shows phase/remaining)
 
@@ -640,7 +655,7 @@ The playlist sidebar displays tracks grouped under per-source headers (CSS class
 
 ### Library Feature
 
-A new **📚 Library** button (in Settings → Library section) lets you browse to a folder and remember it as `playlistFolder` setting. The panel lists every .m3u/.m3u8 file in that folder; clicking one loads it (appends to the current playlist).
+A new **LIB** button lets you browse to a folder and remember it as `playlistFolder` setting. The panel lists every .m3u/.m3u8 file in that folder; clicking one loads it (appends to the current playlist).
 
 **IPC support:**
 - `library:list` (invoke) — Returns an array of `{name, path}` objects for all playlists in the remembered folder.
@@ -913,7 +928,7 @@ files:
   - assets/**
 win:
   target: nsis
-  icon: assets/icon.png
+  icon: assets/icon.ico
 ```
 
 Only source directories are bundled (`main/`, `renderer/`, `themes/`, `assets/`). `node_modules` are bundled by electron-builder's ASAR packer automatically.
@@ -945,6 +960,9 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | 2.0.0-phase1 | V2 Phase 1: fullscreen mode, VisualizerEngine (bars/scope/radial/particles), master volume, ambient art background, DJ subtitles, keyboard shortcuts |
 | 2.0.0-phase2 | V2 Phase 2: LAN remote control from phone, request queue, QR connect panel |
 | 2.0.0 | V2 complete: sleep timer and Pomodoro timer with bilingual TTS announcements, desktop and phone UI controls |
+| 2.1.0 | Multi-playlist support, library folder, queue-aware DJ, playlist source naming |
+| 2.2.0 | Saikou app icon (PNG), emoji → ASCII UI buttons, themed remote applet, remote sync fix |
+| 2.2.1 | Proper `.ico` icon file wired into BrowserWindow and electron-builder |
 
 ---
 
