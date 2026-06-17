@@ -99,6 +99,8 @@ class VisualizerEngine {
     else if (this._style === 'particles') this._drawParticles(analyser, W, H)
     else if (this._style === 'waterfall') this._drawWaterfall(analyser, W, H)
     else if (this._style === 'vu') this._drawVU(analyser, W, H)
+    else if (this._style === 'starfield') this._drawStarfield(analyser, W, H)
+    else if (this._style === 'plasma') this._drawPlasma(analyser, W, H)
     else this._drawBars(analyser, W, H)
   }
 
@@ -258,6 +260,91 @@ class VisualizerEngine {
     drawBar(Math.floor(W * 0.08), this._vuLevels[0], this._vuPeaks[0])
     drawBar(Math.floor(W * 0.64), this._vuLevels[1], this._vuPeaks[1])
     ctx.globalAlpha = 1
+  }
+
+  _drawStarfield(analyser, W, H) {
+    const data = this._freq(analyser)
+    let bass = 0
+    for (let i = 0; i < 8; i++) bass += data[i]
+    bass = bass / (8 * 255)
+
+    const ctx = this._ctx
+    const cx = W / 2, cy = H / 2
+    const speed = 0.006 + bass * 0.022
+
+    ctx.strokeStyle = this._colors.accent
+    for (const s of this._stars) {
+      // Save projected position before moving
+      const opx = (s.x / s.z) * cx + cx
+      const opy = (s.y / s.z) * cy + cy
+      s.z -= speed
+      if (s.z <= 0.01) {
+        s.x = (Math.random() - 0.5) * 2
+        s.y = (Math.random() - 0.5) * 2
+        s.z = 1
+        continue
+      }
+      const nx = (s.x / s.z) * cx + cx
+      const ny = (s.y / s.z) * cy + cy
+      if (nx < 0 || nx > W || ny < 0 || ny > H) {
+        s.x = (Math.random() - 0.5) * 2
+        s.y = (Math.random() - 0.5) * 2
+        s.z = 1
+        continue
+      }
+      const brightness = 1 - s.z
+      ctx.globalAlpha = Math.min(1, brightness * 1.4)
+      ctx.lineWidth = brightness * 2.5
+      ctx.beginPath()
+      ctx.moveTo(opx, opy)
+      ctx.lineTo(nx, ny)
+      ctx.stroke()
+    }
+    ctx.globalAlpha = 1
+  }
+
+  _drawPlasma(analyser, W, H) {
+    const data = this._freq(analyser)
+    let energy = 0
+    for (let i = 0; i < data.length; i++) energy += data[i]
+    energy = energy / (data.length * 255)
+    this._plasmaTime += 0.04 + energy * 0.08
+
+    // Lazy-create low-res offscreen canvas (96×54)
+    if (!this._plasmaOff) {
+      this._plasmaOff = document.createElement('canvas')
+      this._plasmaOff.width = 96
+      this._plasmaOff.height = 54
+    }
+    const pw = 96, ph = 54
+    const offCtx = this._plasmaOff.getContext('2d')
+    const imgData = offCtx.createImageData(pw, ph)
+    const px = imgData.data
+    const t = this._plasmaTime
+
+    // Parse accent hex → rgb
+    const ac = this._colors.accent
+    const ar = parseInt(ac.slice(1, 3), 16)
+    const ag = parseInt(ac.slice(3, 5), 16)
+    const ab = parseInt(ac.slice(5, 7), 16)
+
+    for (let y = 0; y < ph; y++) {
+      for (let x = 0; x < pw; x++) {
+        const v = (
+          Math.sin(x * 0.32 + t) +
+          Math.sin(y * 0.28 + t * 0.7) +
+          Math.sin((x + y) * 0.2 + t * 1.3) +
+          Math.sin(Math.sqrt(x * x + y * y) * 0.38 - t)
+        ) * 0.25 + 0.5  // normalize 0..1
+        const idx = (y * pw + x) * 4
+        px[idx]     = Math.floor(ar * v)
+        px[idx + 1] = Math.floor(ag * v)
+        px[idx + 2] = Math.floor(ab * v + 60 * (1 - v))
+        px[idx + 3] = 220
+      }
+    }
+    offCtx.putImageData(imgData, 0, 0)
+    this._ctx.drawImage(this._plasmaOff, 0, 0, W, H)
   }
 }
 
