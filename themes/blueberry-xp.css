@@ -68,7 +68,7 @@
   box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3) !important;
 }
 
-#open-btn, #settings-btn {
+#open-btn, #settings-btn, #library-btn, #timers-btn, #remote-btn, #fullscreen-btn, #mini-btn {
   background: linear-gradient(to bottom, #5a7ad8 0%, #3a5ab8 100%) !important;
   color: #ffffff !important;
   border: 1px solid #1a3ea8 !important;
@@ -76,7 +76,7 @@
   border-left-color: #7a9ae8 !important;
   border-radius: 3px !important;
 }
-#open-btn:hover, #settings-btn:hover { background: linear-gradient(to bottom, #6a8ae8 0%, #4a6ac8 100%) !important; }
+#open-btn:hover, #settings-btn:hover, #library-btn:hover, #timers-btn:hover, #remote-btn:hover { background: linear-gradient(to bottom, #6a8ae8 0%, #4a6ac8 100%) !important; }
 
 /* Playlist */
 #playlist-panel { background: #1e2e5e; border-left: 1px solid #1a3ea8; }
