@@ -316,9 +316,10 @@ class VisualizerEngine {
       this._plasmaOff = document.createElement('canvas')
       this._plasmaOff.width = 96
       this._plasmaOff.height = 54
+      this._plasmaCtx = this._plasmaOff.getContext('2d')
     }
     const pw = 96, ph = 54
-    const offCtx = this._plasmaOff.getContext('2d')
+    const offCtx = this._plasmaCtx
     const imgData = offCtx.createImageData(pw, ph)
     const px = imgData.data
     const t = this._plasmaTime

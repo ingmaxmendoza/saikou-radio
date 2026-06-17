@@ -76,3 +76,4 @@ body { background: #080f14; }
 .tr .name.active { color: #00ffaa; }
 #timers { background: #0d0d12; }
 #timers .tbtns button { background: #1a2a30; color: #00e5ff; border: 1px solid #003344 !important; border-radius: 8px !important; }
+#shuffle.on { background: #00ffaa !important; color: #000810; }
