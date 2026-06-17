@@ -89,3 +89,17 @@ body .ctrl-btn.active {
   border: 2px solid #000000 !important;
   box-shadow: none !important;
 }
+
+/* ── Remote ── */
+body { background: #c0c0c0; color: #000000; }
+#title { color: #ffffff; font-weight: bold; }
+#artist { color: #cccccc; }
+#transport button { background: #c0c0c0; color: #000000; border: 2px solid #ffffff !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; border-radius: 0 !important; }
+#transport button.big { background: #000080 !important; color: #ffffff; border: 2px solid #ffffff !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; }
+#transport button:active { border-color: #808080 !important; border-right-color: #ffffff !important; border-bottom-color: #ffffff !important; }
+.tr { background: #ffffff; border-radius: 0; }
+.tr.active { background: #000080; }
+.tr .name.active { color: #ffffff; }
+#timers { background: #c0c0c0; border-radius: 0; }
+#timers .tbtns button { background: #c0c0c0; color: #000000; border: 2px solid #ffffff !important; border-right-color: #808080 !important; border-bottom-color: #808080 !important; border-radius: 0 !important; }
+#shuffle.on { background: #000080 !important; color: #ffffff; }

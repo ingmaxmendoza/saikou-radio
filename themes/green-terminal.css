@@ -86,3 +86,22 @@ body {
 #dj-panel { background: #0d120d; border-top: 1px solid #0d3d0d; }
 #dj-panel .dj-label { color: #1a8c1a; }
 #dj-panel .dj-value { color: #33ff33; text-shadow: 0 0 4px #33ff33; }
+
+/* ── Remote ── */
+body {
+  background: #0a0f0a;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px
+  );
+}
+#title { color: #33ff33; text-shadow: 0 0 8px #33ff33; }
+#artist { color: #1a8c1a; }
+#transport button { background: #0a0f0a; color: #33ff33; border: 1px solid #1a8c1a !important; border-radius: 8px !important; text-shadow: 0 0 4px #33ff33; }
+#transport button.big { background: #33ff33 !important; color: #050905; text-shadow: none !important; }
+.tr { background: #080d08; border-radius: 4px; }
+.tr.active { background: #0d120d; border: 1px solid #1a8c1a; }
+.tr .name.active { color: #33ff33; text-shadow: 0 0 4px #33ff33; }
+#timers { background: #0a0f0a; }
+#timers .tbtns button { background: #0a0f0a; color: #33ff33; border: 1px solid #1a8c1a !important; border-radius: 6px !important; }
+#shuffle.on { background: #33ff33 !important; color: #050905; }
