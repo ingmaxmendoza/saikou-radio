@@ -36,7 +36,10 @@ async function synthesizeEdge(text, voice) {
 async function synthesizeSAPI(text, voice) {
   const tmpFile = path.join(os.tmpdir(), `saikou-tts-${Date.now()}.wav`)
   const script = buildSAPIScript(text, voice, tmpFile)
-  execSync(`powershell -NoProfile -Command "${script}"`, { timeout: 10000 })
+  // Feed the script via stdin (-Command -) instead of the command line, so a
+  // double quote in the spoken text or temp path can't break out of the
+  // argument (broken synthesis / command injection from local content).
+  execSync('powershell -NoProfile -Command -', { input: script, timeout: 10000 })
   try {
     return fs.readFileSync(tmpFile)
   } finally {

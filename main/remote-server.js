@@ -48,7 +48,6 @@ class RemoteServer {
   }
 
   isRunning() { return !!this._server }
-  getPort() { return this._port }
   getUrl() { return `http://${getLanIp()}:${this._port}` }
 
   start(port) {

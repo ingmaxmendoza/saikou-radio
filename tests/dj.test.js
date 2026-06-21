@@ -79,8 +79,10 @@ test('buildDJScript adds ES source sentence when mentionPlaylist', () => {
 
 test('buildDJScript omits source when not mentioning or no source', () => {
   expect(buildDJScript({ title: 'X', artist: 'Y' }, null, '1:00 PM', '', 'en-US-AriaNeural', { source: 'chill', mentionPlaylist: false })).not.toContain('chill')
-  expect(buildDJScript({ title: 'X', artist: 'Y' }, null, '1:00 PM', '', 'en-US-AriaNeural', { source: '', mentionPlaylist: true })).not.toContain('playlist.')
-  expect(buildDJScript({ title: 'X', artist: 'Y' }, null, '1:00 PM', '', 'en-US-AriaNeural')).not.toContain('playlist.')
+  // "From the" is unique to the source sentence; the bare word "playlist" also
+  // appears in random time lines/personality, so match the sentence specifically.
+  expect(buildDJScript({ title: 'X', artist: 'Y' }, null, '1:00 PM', '', 'en-US-AriaNeural', { source: '', mentionPlaylist: true })).not.toContain('From the')
+  expect(buildDJScript({ title: 'X', artist: 'Y' }, null, '1:00 PM', '', 'en-US-AriaNeural')).not.toContain('From the')
 })
 
 test('buildDJScript strips ";3" from spoken playlist names', () => {
@@ -92,7 +94,7 @@ test('buildDJScript strips ";3" from spoken playlist names', () => {
   expect(es).toContain('De la lista chillmix.')
   // a name that is ONLY ";3" leaves nothing to mention
   const empty = buildDJScript({ title: 'X', artist: 'Y' }, null, '1:00 PM', '', 'en-US-AriaNeural', { source: ';3', mentionPlaylist: true })
-  expect(empty).not.toContain('playlist.')
+  expect(empty).not.toContain('From the')
 })
 
 test('shouldMentionPlaylist thresholds: 0.15 for one, 0.60 for many', () => {
@@ -189,8 +191,11 @@ test('composeBreak picks Spanish content for an es- voice', () => {
     rng: () => 0.99,
   })
   // Spanish sign-offs all mention Saikou Radio; structural lines are Spanish.
+  // The "heard" line is always present — match every one of its 12 variants so
+  // this stays deterministic regardless of which (randomly drawn) sign-off/time
+  // line accompanies it.
   expect(script).toContain('Saikou Radio')
-  expect(script.toLowerCase()).toMatch(/escuchar|eso fue|directo|acabamos|cortesía|todavía|dejando|espero/)
+  expect(script.toLowerCase()).toMatch(/escuchar|eso fue|directo|acabamos|cortesía|todavía|dejando|espero|haciendo|seguimos/)
 })
 
 test('getPersonalityDeck layers user phrases on top of built-ins', () => {

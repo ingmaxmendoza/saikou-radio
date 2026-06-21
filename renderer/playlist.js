@@ -12,11 +12,6 @@ class PlaylistManager {
     this._index = 0
   }
 
-  loadFromText(text, playlistPath) {
-    this.clear()
-    this.addFromText(text, playlistPath)
-  }
-
   addFromText(text, playlistPath) {
     const dir = path.dirname(playlistPath).replace(/\\/g, '/')
     const source = path.basename(playlistPath, path.extname(playlistPath))

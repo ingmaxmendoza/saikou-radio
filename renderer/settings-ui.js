@@ -1,12 +1,14 @@
 'use strict';
 
 const { ipcRenderer } = require('electron')
+const { ThemeEngine } = require('./theme')
 
 document.addEventListener('DOMContentLoaded', async () => {
   const api = window.saikouAPI
+  const themeEngine = new ThemeEngine()
+  const applyTheme = (val, customPath) => themeEngine.apply(val, customPath)
 
   // ── Element refs ──────────────────────────────────────────────────────────
-  const themeLink        = document.getElementById('theme-link');
   const fadeSeconds      = document.getElementById('fade-seconds');
   const fadeSecondsVal   = document.getElementById('fade-seconds-val');
   const breakInterval    = document.getElementById('break-interval');
@@ -119,15 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function toggleCustomCssRow(val) {
     customCssRow.style.display = (val === 'custom') ? 'flex' : 'none';
-  }
-
-  function applyTheme(val, customPath) {
-    const bust = `?v=${Date.now()}`
-    if (val === 'custom' && customPath) {
-      themeLink.href = `file://${customPath}${bust}`;
-    } else {
-      themeLink.href = `../themes/${val}.css${bust}`;
-    }
   }
 
   // ── Browse buttons ────────────────────────────────────────────────────────
