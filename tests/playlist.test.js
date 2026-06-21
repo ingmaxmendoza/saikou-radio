@@ -11,7 +11,7 @@ test('parses basic m3u file', () => {
   ].join('\n')
 
   const pm = new PlaylistManager()
-  pm.loadFromText(content, 'C:/playlists/my.m3u')
+  pm.addFromText(content, 'C:/playlists/my.m3u')
   expect(pm.tracks).toHaveLength(2)
   expect(pm.tracks[0].path).toBe('C:/music/song.mp3')
   expect(pm.tracks[0].title).toBe('Song Title')
@@ -28,21 +28,21 @@ test('resolves relative paths against playlist dir', () => {
   ].join('\n')
 
   const pm = new PlaylistManager()
-  pm.loadFromText(content, 'C:/playlists/my.m3u')
+  pm.addFromText(content, 'C:/playlists/my.m3u')
   expect(pm.tracks[0].path).toBe('C:/playlists/tracks/song.mp3')
 })
 
 test('skips comment lines and empty lines', () => {
   const content = ['#EXTM3U', '', '# a comment', '#EXTINF:60,A - B', 'C:/a.mp3'].join('\n')
   const pm = new PlaylistManager()
-  pm.loadFromText(content, 'C:/x.m3u')
+  pm.addFromText(content, 'C:/x.m3u')
   expect(pm.tracks).toHaveLength(1)
 })
 
 test('handles missing EXTINF gracefully', () => {
   const content = ['#EXTM3U', 'C:/music/raw.mp3'].join('\n')
   const pm = new PlaylistManager()
-  pm.loadFromText(content, 'C:/x.m3u')
+  pm.addFromText(content, 'C:/x.m3u')
   expect(pm.tracks[0].title).toBe('raw.mp3')
   expect(pm.tracks[0].artist).toBe('')
   expect(pm.tracks[0].duration).toBe(0)
@@ -51,7 +51,7 @@ test('handles missing EXTINF gracefully', () => {
 test('currentTrack and advance', () => {
   const content = ['#EXTM3U', 'C:/a.mp3', 'C:/b.mp3', 'C:/c.mp3'].join('\n')
   const pm = new PlaylistManager()
-  pm.loadFromText(content, 'C:/x.m3u')
+  pm.addFromText(content, 'C:/x.m3u')
   expect(pm.currentTrack().path).toBe('C:/a.mp3')
   pm.advance()
   expect(pm.currentTrack().path).toBe('C:/b.mp3')
@@ -76,12 +76,4 @@ test('clear empties tracks and resets index', () => {
   pm.clear()
   expect(pm.tracks.length).toBe(0)
   expect(pm.currentIndex).toBe(0)
-})
-
-test('loadFromText replaces existing tracks', () => {
-  const pm = new PlaylistManager()
-  pm.addFromText('C:/m/a.mp3\n', 'C:/l/x.m3u')
-  pm.loadFromText('C:/m/b.mp3\n', 'C:/l/y.m3u')
-  expect(pm.tracks.length).toBe(1)
-  expect(pm.tracks[0].source).toBe('y')
 })

@@ -146,4 +146,4 @@ class DJEngine {
   }
 }
 
-module.exports = { DJEngine, buildDJScript, composeBreak, currentTimeString, shouldMentionPlaylist }
+module.exports = { DJEngine, buildDJScript, composeBreak, shouldMentionPlaylist }
