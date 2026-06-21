@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <title>Settings — Saikou Radio</title>
   <link id="theme-link" rel="stylesheet" href="../themes/y2k-silver.css" />
+  <script>
+    // Set the correct theme stylesheet before first paint, using the theme
+    // passed by the main process via query string. Avoids a flash of the
+    // default theme while the async settings load resolves.
+    (function () {
+      var p = new URLSearchParams(location.search);
+      var t = p.get('theme') || 'y2k-silver';
+      var cp = p.get('customThemePath') || '';
+      var el = document.getElementById('theme-link');
+      if (el) el.href = (t === 'custom' && cp) ? ('file://' + cp) : ('../themes/' + t + '.css');
+    })();
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
