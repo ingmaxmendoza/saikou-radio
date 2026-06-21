@@ -60,7 +60,13 @@ function registerIpcHandlers() {
       },
     })
     settingsWindow.setMenu(null)
-    settingsWindow.loadFile(path.join(__dirname, '../renderer/settings.html'))
+    // Pass the current theme so the settings window can paint in the right
+    // theme on the first frame, instead of flashing the hardcoded default
+    // while the async settings:get round-trip resolves.
+    const cur = getStore().get()
+    settingsWindow.loadFile(path.join(__dirname, '../renderer/settings.html'), {
+      query: { theme: cur.theme || 'y2k-silver', customThemePath: cur.customThemePath || '' },
+    })
     settingsWindow.on('closed', () => { settingsWindow = null })
   })
 
