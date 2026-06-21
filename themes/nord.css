@@ -1,0 +1,80 @@
+/* themes/nord.css — Nord (arctic frost) */
+:root {
+  --bg-primary: #2e3440;
+  --bg-secondary: #3b4252;
+  --bg-panel: #434c5e;
+  --bg-lcd: #242933;
+  --text-primary: #eceff4;
+  --text-secondary: #81a1c1;
+  --text-accent: #88c0d0;
+  --border-light: #4c566a;
+  --border-dark: #232831;
+  --btn-bg: #434c5e;
+  --btn-text: #eceff4;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+body { background: #2e3440; color: #eceff4; }
+
+#titlebar { background: linear-gradient(to bottom, #3b4252, #2e3440); border-bottom: 1px solid #4c566a; }
+#titlebar .logo { color: #eceff4; letter-spacing: 2px; }
+#titlebar .clock { color: #88c0d0; }
+
+#lcd {
+  background: #242933;
+  color: #88c0d0;
+  border: 1px solid #4c566a;
+  box-shadow: inset 0 0 8px rgba(136,192,208,0.12);
+}
+#lcd .track-title { color: #eceff4; }
+#lcd .track-meta { color: #81a1c1 !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #88c0d0 0%, #88c0d0 var(--seek-pct,0%), #3b4252 var(--seek-pct,0%), #3b4252 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #88c0d0 !important;
+  border: 2px solid #2e3440 !important;
+  box-shadow: 0 0 4px rgba(136,192,208,0.4) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #434c5e, #3b4252) !important;
+  color: #eceff4 !important;
+  border: 1px solid #4c566a !important;
+  border-right-color: #232831 !important;
+  border-bottom-color: #232831 !important;
+}
+.ctrl-btn:hover { border-color: #88c0d0 !important; }
+.ctrl-btn.active { background: linear-gradient(to bottom, #88c0d0, #5e81ac) !important; color: #2e3440 !important; border-color: #5e81ac !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #434c5e, #3b4252) !important;
+  color: #eceff4 !important;
+  border: 1px solid #4c566a !important;
+  border-right-color: #232831 !important;
+  border-bottom-color: #232831 !important;
+}
+
+#playlist-panel { background: #434c5e; border-left: 1px solid #4c566a; }
+#playlist-panel .pl-header { color: #81a1c1; letter-spacing: 1px; }
+.pl-track { color: #d8dee9; }
+.pl-track:hover { background: #4c566a; color: #eceff4; }
+.pl-track.active { color: #88c0d0; font-weight: bold; }
+
+#dj-panel { background: linear-gradient(to bottom, #3b4252, #2e3440); border-top: 1px solid #4c566a; }
+#dj-panel .dj-label { color: #81a1c1; }
+#dj-panel .dj-value { color: #88c0d0; }
+
+/* ── Remote ── */
+body { background: #2e3440; color: #eceff4; }
+#title { color: #88c0d0; }
+#artist { color: #81a1c1; }
+#transport button { background: linear-gradient(to bottom, #434c5e, #3b4252); color: #eceff4; border: 1px solid #4c566a !important; border-radius: 10px !important; }
+#transport button.big { background: linear-gradient(to bottom, #88c0d0, #5e81ac) !important; color: #2e3440; }
+.tr { background: #3b4252; }
+.tr.active { background: #434c5e; border: 1px solid rgba(136,192,208,0.3); }
+.tr .name.active { color: #88c0d0; }
+#timers { background: #3b4252; }
+#timers .tbtns button { background: linear-gradient(to bottom, #434c5e, #3b4252); color: #eceff4; border: 1px solid #4c566a !important; border-radius: 8px !important; }
+#shuffle.on { background: linear-gradient(to bottom, #88c0d0, #5e81ac) !important; color: #2e3440; }

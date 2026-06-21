@@ -1,0 +1,81 @@
+/* themes/gruvbox-dark.css — Gruvbox Dark (retro warm) */
+:root {
+  --bg-primary: #282828;
+  --bg-secondary: #3c3836;
+  --bg-panel: #32302f;
+  --bg-lcd: #1d2021;
+  --text-primary: #ebdbb2;
+  --text-secondary: #a89984;
+  --text-accent: #fe8019;
+  --border-light: #504945;
+  --border-dark: #1d2021;
+  --btn-bg: #504945;
+  --btn-text: #ebdbb2;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+body { background: #282828; color: #ebdbb2; }
+
+#titlebar { background: linear-gradient(to bottom, #3c3836, #282828); border-bottom: 1px solid #504945; }
+#titlebar .logo { color: #ebdbb2; letter-spacing: 2px; }
+#titlebar .clock { color: #fe8019; }
+
+#lcd {
+  background: #1d2021;
+  color: #fe8019;
+  border: 1px solid #504945;
+  box-shadow: inset 0 0 8px rgba(254,128,25,0.12);
+}
+#lcd .track-title { color: #ebdbb2; }
+#lcd .track-meta { color: #a89984 !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #fe8019 0%, #fe8019 var(--seek-pct,0%), #3c3836 var(--seek-pct,0%), #3c3836 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #fe8019 !important;
+  border: 2px solid #282828 !important;
+  box-shadow: 0 0 4px rgba(254,128,25,0.4) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #504945, #3c3836) !important;
+  color: #ebdbb2 !important;
+  border: 1px solid #665c54 !important;
+  border-right-color: #1d2021 !important;
+  border-bottom-color: #1d2021 !important;
+}
+.ctrl-btn:hover { border-color: #fe8019 !important; }
+.ctrl-btn.active { background: linear-gradient(to bottom, #fe8019, #d65d0e) !important; color: #282828 !important; border-color: #d65d0e !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #504945, #3c3836) !important;
+  color: #ebdbb2 !important;
+  border: 1px solid #665c54 !important;
+  border-right-color: #1d2021 !important;
+  border-bottom-color: #1d2021 !important;
+}
+
+#playlist-panel { background: #32302f; border-left: 1px solid #504945; }
+#playlist-panel .pl-header { color: #a89984; letter-spacing: 1px; }
+.pl-track { color: #d5c4a1; }
+.pl-track:hover { background: #3c3836; color: #ebdbb2; }
+.pl-track.active { color: #fe8019; font-weight: bold; }
+.pl-track.error { color: #fb4934; }
+
+#dj-panel { background: linear-gradient(to bottom, #3c3836, #282828); border-top: 1px solid #504945; }
+#dj-panel .dj-label { color: #a89984; }
+#dj-panel .dj-value { color: #fe8019; }
+
+/* ── Remote ── */
+body { background: #282828; color: #ebdbb2; }
+#title { color: #fe8019; }
+#artist { color: #a89984; }
+#transport button { background: linear-gradient(to bottom, #504945, #3c3836); color: #ebdbb2; border: 1px solid #665c54 !important; border-radius: 10px !important; }
+#transport button.big { background: linear-gradient(to bottom, #fe8019, #d65d0e) !important; color: #282828; }
+.tr { background: #3c3836; }
+.tr.active { background: #504945; border: 1px solid rgba(254,128,25,0.3); }
+.tr .name.active { color: #fe8019; }
+#timers { background: #3c3836; }
+#timers .tbtns button { background: linear-gradient(to bottom, #504945, #3c3836); color: #ebdbb2; border: 1px solid #665c54 !important; border-radius: 8px !important; }
+#shuffle.on { background: linear-gradient(to bottom, #fe8019, #d65d0e) !important; color: #282828; }

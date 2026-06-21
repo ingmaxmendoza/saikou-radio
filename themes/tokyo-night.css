@@ -1,0 +1,81 @@
+/* themes/tokyo-night.css — Tokyo Night (deep blue/purple) */
+:root {
+  --bg-primary: #1a1b26;
+  --bg-secondary: #1f2335;
+  --bg-panel: #24283b;
+  --bg-lcd: #16161e;
+  --text-primary: #c0caf5;
+  --text-secondary: #565f89;
+  --text-accent: #7aa2f7;
+  --border-light: #292e42;
+  --border-dark: #101014;
+  --btn-bg: #292e42;
+  --btn-text: #c0caf5;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+body { background: #1a1b26; color: #c0caf5; }
+
+#titlebar { background: linear-gradient(to bottom, #1f2335, #1a1b26); border-bottom: 1px solid #292e42; }
+#titlebar .logo { color: #c0caf5; letter-spacing: 2px; }
+#titlebar .clock { color: #7aa2f7; }
+
+#lcd {
+  background: #16161e;
+  color: #7aa2f7;
+  border: 1px solid #292e42;
+  box-shadow: inset 0 0 8px rgba(122,162,247,0.14);
+}
+#lcd .track-title { color: #c0caf5; }
+#lcd .track-meta { color: #7dcfff !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #7aa2f7 0%, #7aa2f7 var(--seek-pct,0%), #292e42 var(--seek-pct,0%), #292e42 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #7aa2f7 !important;
+  border: 2px solid #16161e !important;
+  box-shadow: 0 0 4px rgba(122,162,247,0.5) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #292e42, #1f2335) !important;
+  color: #c0caf5 !important;
+  border: 1px solid #3b4261 !important;
+  border-right-color: #101014 !important;
+  border-bottom-color: #101014 !important;
+}
+.ctrl-btn:hover { border-color: #7aa2f7 !important; }
+.ctrl-btn.active { background: linear-gradient(to bottom, #7aa2f7, #bb9af7) !important; color: #1a1b26 !important; border-color: #bb9af7 !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #292e42, #1f2335) !important;
+  color: #c0caf5 !important;
+  border: 1px solid #3b4261 !important;
+  border-right-color: #101014 !important;
+  border-bottom-color: #101014 !important;
+}
+
+#playlist-panel { background: #24283b; border-left: 1px solid #292e42; }
+#playlist-panel .pl-header { color: #565f89; letter-spacing: 1px; }
+.pl-track { color: #a9b1d6; }
+.pl-track:hover { background: #292e42; color: #c0caf5; }
+.pl-track.active { color: #7aa2f7; font-weight: bold; }
+.pl-track.error { color: #f7768e; }
+
+#dj-panel { background: linear-gradient(to bottom, #1f2335, #1a1b26); border-top: 1px solid #292e42; }
+#dj-panel .dj-label { color: #565f89; }
+#dj-panel .dj-value { color: #7aa2f7; }
+
+/* ── Remote ── */
+body { background: #1a1b26; color: #c0caf5; }
+#title { color: #7aa2f7; }
+#artist { color: #565f89; }
+#transport button { background: linear-gradient(to bottom, #292e42, #1f2335); color: #c0caf5; border: 1px solid #3b4261 !important; border-radius: 10px !important; }
+#transport button.big { background: linear-gradient(to bottom, #7aa2f7, #bb9af7) !important; color: #1a1b26; }
+.tr { background: #1f2335; }
+.tr.active { background: #292e42; border: 1px solid rgba(122,162,247,0.3); }
+.tr .name.active { color: #7aa2f7; }
+#timers { background: #1f2335; }
+#timers .tbtns button { background: linear-gradient(to bottom, #292e42, #1f2335); color: #c0caf5; border: 1px solid #3b4261 !important; border-radius: 8px !important; }
+#shuffle.on { background: linear-gradient(to bottom, #7aa2f7, #bb9af7) !important; color: #1a1b26; }
