@@ -1,0 +1,84 @@
+/* themes/catppuccin-latte.css — Catppuccin Latte (light, soft) */
+:root {
+  --bg-primary: #eff1f5;
+  --bg-secondary: #e6e9ef;
+  --bg-panel: #dce0e8;
+  --bg-lcd: #4c4f69;
+  --text-primary: #4c4f69;
+  --text-secondary: #6c6f85;
+  --text-accent: #8839ef;
+  --border-light: #ffffff;
+  --border-dark: #bcc0cc;
+  --btn-bg: #ccd0da;
+  --btn-text: #4c4f69;
+  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+
+body { background: #eff1f5; color: #4c4f69; }
+
+#titlebar { background: linear-gradient(to bottom, #e6e9ef, #dce0e8); border-bottom: 1px solid #bcc0cc; }
+#titlebar .logo { color: #4c4f69; letter-spacing: 2px; }
+#titlebar .clock { color: #8839ef; }
+
+#lcd {
+  background: #4c4f69;
+  color: #cba6f7;
+  border: 1px solid #bcc0cc;
+  border-radius: 6px;
+  box-shadow: inset 0 0 8px rgba(136,57,239,0.15);
+}
+#lcd .track-title { color: #eff1f5; }
+#lcd .track-meta { color: #b4befe !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #8839ef 0%, #8839ef var(--seek-pct,0%), #ccd0da var(--seek-pct,0%), #ccd0da 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: #8839ef !important;
+  border: 2px solid #eff1f5 !important;
+  box-shadow: 0 0 4px rgba(136,57,239,0.4) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #e6e9ef, #ccd0da) !important;
+  color: #4c4f69 !important;
+  border: 1px solid #ffffff !important;
+  border-right-color: #bcc0cc !important;
+  border-bottom-color: #bcc0cc !important;
+  border-radius: 6px !important;
+}
+.ctrl-btn:hover { border-color: #8839ef !important; }
+.ctrl-btn.active { background: linear-gradient(to bottom, #8839ef, #7287fd) !important; color: #eff1f5 !important; border-color: #7287fd !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #e6e9ef, #ccd0da) !important;
+  color: #4c4f69 !important;
+  border: 1px solid #ffffff !important;
+  border-right-color: #bcc0cc !important;
+  border-bottom-color: #bcc0cc !important;
+  border-radius: 6px !important;
+}
+
+#playlist-panel { background: #dce0e8; border-left: 1px solid #bcc0cc; }
+#playlist-panel .pl-header { color: #6c6f85; letter-spacing: 1px; }
+.pl-track { color: #5c5f77; }
+.pl-track:hover { background: #ccd0da; color: #4c4f69; }
+.pl-track.active { color: #8839ef; font-weight: bold; }
+.pl-track.error { color: #d20f39; }
+
+#dj-panel { background: linear-gradient(to bottom, #e6e9ef, #dce0e8); border-top: 1px solid #bcc0cc; }
+#dj-panel .dj-label { color: #6c6f85; }
+#dj-panel .dj-value { color: #8839ef; }
+
+/* ── Remote ── */
+body { background: #eff1f5; color: #4c4f69; }
+#title { color: #8839ef; }
+#artist { color: #6c6f85; }
+#transport button { background: linear-gradient(to bottom, #e6e9ef, #ccd0da); color: #4c4f69; border: 1px solid #bcc0cc !important; border-radius: 10px !important; }
+#transport button.big { background: linear-gradient(to bottom, #8839ef, #7287fd) !important; color: #eff1f5; }
+.tr { background: #dce0e8; }
+.tr.active { background: #ccd0da; border: 1px solid rgba(136,57,239,0.3); }
+.tr .name.active { color: #8839ef; }
+#timers { background: #e6e9ef; }
+#timers .tbtns button { background: linear-gradient(to bottom, #e6e9ef, #ccd0da); color: #4c4f69; border: 1px solid #bcc0cc !important; border-radius: 8px !important; }
+#shuffle.on { background: linear-gradient(to bottom, #8839ef, #7287fd) !important; color: #eff1f5; }

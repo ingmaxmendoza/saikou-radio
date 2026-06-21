@@ -1,0 +1,80 @@
+/* themes/aqua.css — Aqua (Mac OS X glossy) */
+:root {
+  --bg-primary: #e8e8e8;
+  --bg-secondary: #dcdcdc;
+  --bg-panel: #e4e4e4;
+  --bg-lcd: #1a2733;
+  --text-primary: #1c1c1c;
+  --text-secondary: #5a5a5a;
+  --text-accent: #2b7fff;
+  --border-light: #ffffff;
+  --border-dark: #a8a8a8;
+  --btn-bg: #f4f4f4;
+  --btn-text: #1c1c1c;
+  --font-ui: 'Lucida Grande', 'Helvetica Neue', sans-serif;
+  --font-mono: 'Monaco', 'Courier New', monospace;
+}
+
+body { background: #e8e8e8; color: #1c1c1c; }
+
+#titlebar { background: linear-gradient(to bottom, #f0f0f0, #d0d0d0); border-bottom: 1px solid #a8a8a8; }
+#titlebar .logo { color: #1c1c1c; letter-spacing: 1px; }
+#titlebar .clock { color: #2b7fff; }
+
+#lcd {
+  background: linear-gradient(to bottom, #243a4d, #1a2733);
+  color: #6fb4ff;
+  border: 1px solid #0a64d6;
+  border-radius: 8px;
+  box-shadow: inset 0 1px 6px rgba(0,0,0,0.5), 0 0 4px rgba(43,127,255,0.25);
+}
+#lcd .track-title { color: #eaf4ff; }
+#lcd .track-meta { color: #9cc8f5 !important; }
+
+#seek-slider {
+  background: linear-gradient(to right, #2b7fff 0%, #2b7fff var(--seek-pct,0%), #c4c4c4 var(--seek-pct,0%), #c4c4c4 100%) !important;
+}
+#seek-slider::-webkit-slider-thumb {
+  background: radial-gradient(circle at 50% 30%, #eaf4ff, #2b7fff) !important;
+  border: 1px solid #0a64d6 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+}
+
+.ctrl-btn {
+  background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 48%, #e0e0e0 52%, #f4f4f4 100%) !important;
+  color: #1c1c1c !important;
+  border: 1px solid #a8a8a8 !important;
+  border-radius: 12px !important;
+}
+.ctrl-btn:hover { filter: brightness(1.03); }
+.ctrl-btn.active { background: linear-gradient(to bottom, #5aa3ff 0%, #2b7fff 48%, #0a64d6 52%, #3a8bff 100%) !important; color: #ffffff !important; border-color: #0a64d6 !important; }
+#open-btn, #settings-btn {
+  background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 48%, #e0e0e0 52%, #f4f4f4 100%) !important;
+  color: #1c1c1c !important;
+  border: 1px solid #a8a8a8 !important;
+  border-radius: 12px !important;
+}
+
+#playlist-panel { background: #e4e4e4; border-left: 1px solid #a8a8a8; }
+#playlist-panel .pl-header { color: #5a5a5a; letter-spacing: 1px; }
+.pl-track { color: #3a3a3a; }
+.pl-track:hover { background: #d4d4d4; color: #1c1c1c; }
+.pl-track.active { color: #ffffff; background: linear-gradient(to bottom, #5aa3ff, #2b7fff); font-weight: bold; }
+.pl-track.error { color: #d0021b; }
+
+#dj-panel { background: linear-gradient(to bottom, #f0f0f0, #d8d8d8); border-top: 1px solid #a8a8a8; }
+#dj-panel .dj-label { color: #5a5a5a; }
+#dj-panel .dj-value { color: #2b7fff; }
+
+/* ── Remote ── */
+body { background: #e8e8e8; color: #1c1c1c; }
+#title { color: #2b7fff; }
+#artist { color: #5a5a5a; }
+#transport button { background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 48%, #e0e0e0 52%, #f4f4f4 100%); color: #1c1c1c; border: 1px solid #a8a8a8 !important; border-radius: 12px !important; }
+#transport button.big { background: linear-gradient(to bottom, #5aa3ff 0%, #2b7fff 48%, #0a64d6 52%, #3a8bff 100%) !important; color: #ffffff; }
+.tr { background: #ececec; }
+.tr.active { background: linear-gradient(to bottom, #5aa3ff, #2b7fff); }
+.tr .name.active { color: #ffffff; }
+#timers { background: #e4e4e4; }
+#timers .tbtns button { background: linear-gradient(to bottom, #ffffff 0%, #f0f0f0 48%, #e0e0e0 52%, #f4f4f4 100%); color: #1c1c1c; border: 1px solid #a8a8a8 !important; border-radius: 10px !important; }
+#shuffle.on { background: linear-gradient(to bottom, #5aa3ff 0%, #2b7fff 48%, #0a64d6 52%, #3a8bff 100%) !important; color: #ffffff; }

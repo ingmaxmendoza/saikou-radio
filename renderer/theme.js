@@ -1,5 +1,5 @@
 // renderer/theme.js
-const BUILT_IN_THEMES = ['y2k-silver', 'dark-lcd', 'blueberry-xp', 'win98', 'white-on-black', 'green-terminal', 'c64-amber', 'vaporwave', 'warm-sepia', 'catppuccin-mocha', 'ipod-classic', 'marlboro', 'sakura', 'game-boy']
+const BUILT_IN_THEMES = ['y2k-silver', 'dark-lcd', 'blueberry-xp', 'win98', 'white-on-black', 'green-terminal', 'c64-amber', 'vaporwave', 'warm-sepia', 'catppuccin-mocha', 'ipod-classic', 'marlboro', 'sakura', 'game-boy', 'nord', 'gruvbox-dark', 'catppuccin-latte', 'aqua', 'tokyo-night']
 
 class ThemeEngine {
   apply(themeName, customPath) {
