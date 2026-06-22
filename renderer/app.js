@@ -37,7 +37,6 @@ const trackMeta = $('track-meta')
 const seekSlider = $('seek-slider')
 const playlistList = $('playlist-list')
 const djCountdown = $('dj-countdown')
-const djEngineEl = $('dj-engine')
 const djJingles = $('dj-jingles')
 const djStatus = $('dj-status')
 const clockEl = $('clock')
@@ -101,7 +100,6 @@ updateClock()
 async function loadSettings() {
   settings = await window.saikouAPI.getSettings()
   theme.apply(settings.theme, settings.customThemePath)
-  djEngineEl.textContent = (settings.ttsEngine || 'edge').toUpperCase()
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
   audio.setFadeDuration(settings.fadeSeconds ?? 2)
   applyVolume(settings.volume ?? 1, false)
@@ -315,7 +313,7 @@ async function runDJBreak() {
       const pick = files[Math.floor(Math.random() * files.length)]
       await audio.playFile(path.join(folder, pick))
     },
-    synthesizeTTS: (text, engine, voice) => window.saikouAPI.synthesizeTTS(text, engine, voice),
+    synthesizeTTS: (text, voice) => window.saikouAPI.synthesizeTTS(text, voice),
     getSettings: () => settings,
     getPlaylist: () => playlist,
     getNextTrack: () => {
@@ -398,7 +396,7 @@ async function speakOverMusic(text) {
   const resumeAt = lastElapsed
   const track = playlist.currentTrack()
   try {
-    const buf = await window.saikouAPI.synthesizeTTS(text, settings.ttsEngine, settings.ttsVoice)
+    const buf = await window.saikouAPI.synthesizeTTS(text, settings.ttsVoice)
     await audio.playBuffer(buf)
   } catch (err) {
     console.error('[pomodoro speak]', err)

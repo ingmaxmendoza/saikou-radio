@@ -4,7 +4,6 @@ const path = require('path')
 
 const DEFAULTS = {
   breakInterval: 15,
-  ttsEngine: 'edge',
   ttsVoice: 'en-US-AriaNeural',
   jinglesEnabled: false,
   jinglesFolder: '',

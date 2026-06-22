@@ -88,9 +88,9 @@ function registerIpcHandlers() {
     return saved
   })
 
-  ipcMain.handle('tts:synthesize', async (_e, { text, engine, voice }) => {
+  ipcMain.handle('tts:synthesize', async (_e, { text, voice }) => {
     try {
-      return await synthesize(text, engine, voice)
+      return await synthesize(text, voice)
     } catch (err) {
       throw new Error(`TTS failed: ${err.message}`)
     }

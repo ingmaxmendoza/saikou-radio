@@ -137,7 +137,7 @@ class DJEngine {
     if (this._onScript) this._onScript(script)
 
     try {
-      const audioBuffer = await this._synthesizeTTS(script, settings.ttsEngine, settings.ttsVoice)
+      const audioBuffer = await this._synthesizeTTS(script, settings.ttsVoice)
       await this._playAudioBuffer(audioBuffer)
     } catch (err) {
       console.error('[DJEngine] TTS error:', err)

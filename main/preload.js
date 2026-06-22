@@ -3,8 +3,8 @@ const { ipcRenderer } = require('electron')
 window.saikouAPI = {
   getSettings: () => ipcRenderer.invoke('settings:get'),
   saveSettings: (s) => ipcRenderer.invoke('settings:save', s),
-  synthesizeTTS: async (text, engine, voice) => {
-    const buf = await ipcRenderer.invoke('tts:synthesize', { text, engine, voice })
+  synthesizeTTS: async (text, voice) => {
+    const buf = await ipcRenderer.invoke('tts:synthesize', { text, voice })
     // IPC serializes Node Buffer as a plain object with numeric keys; coerce back
     if (buf instanceof Uint8Array) return buf
     return new Uint8Array(Object.values(buf))
@@ -14,7 +14,7 @@ window.saikouAPI = {
   readFileAsBuffer: (filePath) => ipcRenderer.invoke('fs:readFile', filePath),
   readMetadata: (filePath) => ipcRenderer.invoke('metadata:read', filePath),
   openSettingsWindow: () => ipcRenderer.invoke('window:openSettings'),
-  listVoices: (engine) => ipcRenderer.invoke('tts:listVoices', engine),
+  listVoices: () => ipcRenderer.invoke('tts:listVoices'),
   setMiniMode: (on) => ipcRenderer.invoke(on ? 'window:mini' : 'window:restore'),
   setFullscreen: (on) => ipcRenderer.invoke(on ? 'window:fullscreen' : 'window:windowed'),
   sendRemoteState: (state) => ipcRenderer.send('remote:state', state),

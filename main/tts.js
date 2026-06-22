@@ -15,8 +15,7 @@ async function synthesizeEdge(text, voice) {
   })
 }
 
-async function synthesize(text, engine, voice) {
-  // Edge is the only TTS engine; `engine` is kept for call-site compatibility.
+async function synthesize(text, voice) {
   return synthesizeEdge(text, voice)
 }
 

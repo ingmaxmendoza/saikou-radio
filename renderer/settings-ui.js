@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const breakInterval    = document.getElementById('break-interval');
   const loopCb           = document.getElementById('loop');
   const shuffleCb        = document.getElementById('shuffle');
-  const ttsEngine        = document.getElementById('tts-engine');
   const ttsVoice         = document.getElementById('tts-voice');
   const personalityArea  = document.getElementById('personality-phrases');
   const jinglesEnabled   = document.getElementById('jingles-enabled');
@@ -59,7 +58,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   breakInterval.value       = settings.breakInterval ?? 15;
   loopCb.checked            = !!settings.loop;
   shuffleCb.checked         = !!settings.shuffle;
-  ttsEngine.value           = settings.ttsEngine ?? 'edge';
   personalityArea.value     = (settings.personalityPhrases ?? []).join('\n');
   jinglesEnabled.checked    = !!settings.jinglesEnabled;
   jinglesFolder.value       = settings.jinglesFolder ?? '';
@@ -79,9 +77,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   playlistFolder.value = settings.playlistFolder ?? '';
 
   // ── Voice dropdown ────────────────────────────────────────────────────────
-  async function populateVoices(engine, currentVoice) {
+  async function populateVoices(currentVoice) {
     ttsVoice.innerHTML = '<option value="">Loading…</option>';
-    const voices = await api.listVoices(engine).catch(() => []);
+    const voices = await api.listVoices().catch(() => []);
     ttsVoice.innerHTML = '';
     if (voices.length === 0) {
       ttsVoice.innerHTML = '<option value="">No voices found</option>';
@@ -96,11 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ttsVoice.value = currentVoice || voices[0].name;
   }
 
-  await populateVoices(settings.ttsEngine ?? 'edge', settings.ttsVoice ?? '');
-
-  ttsEngine.addEventListener('change', () => {
-    populateVoices(ttsEngine.value, '');
-  });
+  await populateVoices(settings.ttsVoice ?? '');
 
   // Apply theme to this window immediately
   applyTheme(themeSelect.value, customThemePath.value);
@@ -156,7 +150,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       breakInterval:      parseInt(breakInterval.value, 10) || 15,
       loop:               loopCb.checked,
       shuffle:            shuffleCb.checked,
-      ttsEngine:          ttsEngine.value,
       ttsVoice:           ttsVoice.value,
       personalityPhrases: phrases,
       jinglesEnabled:     jinglesEnabled.checked,

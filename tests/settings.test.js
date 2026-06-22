@@ -19,7 +19,6 @@ afterEach(() => {
 test('returns defaults when no file exists', () => {
   const s = store.get()
   expect(s.breakInterval).toBe(15)
-  expect(s.ttsEngine).toBe('edge')
   expect(s.jinglesEnabled).toBe(false)
   expect(s.theme).toBe('y2k-silver')
   expect(s.loop).toBe(true)
@@ -37,7 +36,7 @@ test('saves and reloads settings', () => {
   const s = store2.get()
   expect(s.theme).toBe('dark-lcd')
   expect(s.breakInterval).toBe(20)
-  expect(s.ttsEngine).toBe('edge') // defaults preserved
+  expect(s.ttsVoice).toBe('en-US-AriaNeural') // defaults preserved
 })
 
 test('save merges with defaults', () => {
