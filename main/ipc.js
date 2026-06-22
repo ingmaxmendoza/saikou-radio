@@ -132,27 +132,7 @@ function registerIpcHandlers() {
     }
   })
 
-  ipcMain.handle('tts:listVoices', async (_e, engine) => {
-    if (engine === 'sapi') {
-      const { execSync } = require('child_process')
-      try {
-        const script = `
-Add-Type -AssemblyName System.Speech
-$s = New-Object System.Speech.Synthesis.SpeechSynthesizer
-$s.GetInstalledVoices() | ForEach-Object {
-  $v = $_.VoiceInfo
-  "$($v.Name)|$($v.Culture)|$($v.Gender)"
-}
-`
-        const out = execSync(`powershell -NoProfile -Command "${script.replace(/\n/g, ' ')}"`, { timeout: 8000 }).toString()
-        return out.trim().split('\n').filter(Boolean).map(line => {
-          const [name, culture, gender] = line.trim().split('|')
-          return { name, culture, gender }
-        })
-      } catch {
-        return []
-      }
-    }
+  ipcMain.handle('tts:listVoices', async () => {
     // Edge TTS — return a curated list of common EN/ES neural voices
     return [
       { name: 'en-US-AriaNeural',    culture: 'en-US', gender: 'Female' },

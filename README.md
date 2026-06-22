@@ -9,7 +9,7 @@ Built with Electron.
 ## Features
 
 - **DJ breaks** — every 15 minutes the music pauses and a voice DJ announces what you just heard, what's coming up, and the current time
-- **Text-to-speech** — uses Microsoft Edge TTS (natural-sounding voices) with a SAPI fallback
+- **Text-to-speech** — uses Microsoft Edge TTS (natural-sounding neural voices)
 - **Multi-playlist support** — point Saikou at a folder full of `.m3u` files and load them all at once
 - **No-repeat smart shuffle** — tracks won't repeat until the whole deck has played
 - **19 built-in themes** — from Y2K Silver, Dark LCD, Blueberry XP and Win98 to Nord, Gruvbox Dark, Catppuccin (Mocha & Latte), Tokyo Night, Aqua, Game Boy, Vaporwave and more, plus custom CSS support
