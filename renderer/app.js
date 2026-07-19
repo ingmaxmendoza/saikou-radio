@@ -540,7 +540,17 @@ function handleRemoteCommand(cmd) {
   pushRemoteState()
 }
 
+// Crossfade: when a track enters its fade-out window, start the next one under
+// it — unless a DJ break is due, in which case we let the track end naturally.
+let crossfadeAdvancing = false
+audio.onCrossfade(async () => {
+  if (breakPending || !isPlaying) return
+  crossfadeAdvancing = true
+  try { await playNext() } finally { crossfadeAdvancing = false }
+})
+
 audio.onTrackEnd(async () => {
+  if (crossfadeAdvancing) return
   if (breakPending) {
     await runDJBreak()
     await playNext()
