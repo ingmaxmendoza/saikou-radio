@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron')
+const { app, BrowserWindow, Menu, globalShortcut } = require('electron')
 const path = require('path')
 const { registerIpcHandlers } = require('./ipc')
 
@@ -23,9 +23,16 @@ function createMainWindow() {
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
 }
 
+function sendCommand(action) {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('remote:command', { action })
+}
+
 app.whenReady().then(() => {
   registerIpcHandlers()
   createMainWindow()
+  globalShortcut.register('MediaPlayPause', () => sendCommand('toggle'))
+  globalShortcut.register('MediaNextTrack', () => sendCommand('next'))
+  globalShortcut.register('MediaPreviousTrack', () => sendCommand('prev'))
 })
 
 app.on('window-all-closed', () => {
