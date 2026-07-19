@@ -72,6 +72,7 @@ visualizer = new VisualizerEngine($('viz-canvas'), () => audio.getAnalyser())
 
 let monoEnabled = false
 let seekDragging = false
+let loadedPlaylistPaths = []
 let shuffleQueue = []   // shuffled indices
 let shufflePos = 0      // current position in queue
 
@@ -153,14 +154,20 @@ async function loadPlaylists(paths, { append = true } = {}) {
   if (!paths || paths.length === 0) return
   const openBtn = $('open-btn')
   try {
-    if (!append) { playlist.clear(); failedTracks.clear(); requestQueue = [] }
+    if (!append) { playlist.clear(); failedTracks.clear(); requestQueue = []; loadedPlaylistPaths = [] }
     const startIndex = playlist.tracks.length
     for (const p of paths) {
-      const bytes = await window.saikouAPI.readFileAsBuffer(p)
-      const buf = bytes instanceof Uint8Array ? bytes : new Uint8Array(Object.values(bytes))
-      const text = new TextDecoder().decode(buf)
-      playlist.addFromText(text, p)
+      try {
+        const bytes = await window.saikouAPI.readFileAsBuffer(p)
+        const buf = bytes instanceof Uint8Array ? bytes : new Uint8Array(Object.values(bytes))
+        const text = new TextDecoder().decode(buf)
+        playlist.addFromText(text, p)
+        if (!loadedPlaylistPaths.includes(p)) loadedPlaylistPaths.push(p)
+      } catch (err) {
+        console.error('loadPlaylists: skipping unreadable file', p, err)
+      }
     }
+    window.saikouAPI.saveSettings({ lastPlaylists: loadedPlaylistPaths })
     renderPlaylist()
     if (playlist.tracks.length === 0) { djStatus.textContent = 'No tracks found in playlist.'; return }
 
@@ -211,6 +218,8 @@ async function clearPlaylists() {
   playlist.clear()
   failedTracks.clear()
   requestQueue = []
+  loadedPlaylistPaths = []
+  window.saikouAPI.saveSettings({ lastPlaylists: [] })
   shuffleQueue = []
   isPlaying = false
   btnPlay.textContent = '>'
@@ -642,6 +651,16 @@ function syncDjBtn() {
   djBtn.classList.toggle('off', settings.djEnabled === false)
   djBtn.title = settings.djEnabled === false ? 'DJ breaks off — click to enable' : 'DJ breaks on — click to disable'
 }
+$('djbreak-btn').onclick = () => handleRemoteCommand({ action: 'djbreak' })
+
+// Drag & drop .m3u files anywhere on the window
+document.addEventListener('dragover', (e) => e.preventDefault())
+document.addEventListener('drop', (e) => {
+  e.preventDefault()
+  const paths = [...e.dataTransfer.files].map(f => f.path).filter(p => /\.m3u8?$/i.test(p))
+  if (paths.length) loadPlaylists(paths, { append: true })
+})
+
 djBtn.onclick = () => {
   settings.djEnabled = settings.djEnabled === false
   if (!settings.djEnabled) breakPending = false
@@ -793,4 +812,8 @@ window.saikouAPI.onRemoteCommand(handleRemoteCommand)
 setInterval(onSecond, 1000)
 
 // --- Init ---
-loadSettings()
+loadSettings().then(() => {
+  if (Array.isArray(settings.lastPlaylists) && settings.lastPlaylists.length) {
+    loadPlaylists(settings.lastPlaylists, { append: true })
+  }
+})
