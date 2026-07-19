@@ -315,6 +315,7 @@ async function playNext() {
 async function runDJBreak() {
   breakPending = false
   djStatus.textContent = 'ON AIR...'
+  let breakErrored = false
   const dj = new DJEngine({
     playAudioBuffer: (buf) => audio.playBuffer(buf),
     playJingle: async (folder) => {
@@ -335,12 +336,12 @@ async function runDJBreak() {
       }
       return playlist.tracks[(playlist.currentIndex + 1) % playlist.tracks.length] ?? null
     },
-    onError: (msg) => { djStatus.textContent = `TTS error: ${msg}` },
+    onError: (msg) => { breakErrored = true; djStatus.textContent = `DJ skipped — TTS unavailable (offline?): ${msg}` },
     onScript: (script) => { if (settings.djSubtitles) showSubtitle(script) },
   })
   await dj.runBreak()
   hideSubtitle()
-  djStatus.textContent = ''
+  if (!breakErrored) djStatus.textContent = ''
   if (scheduler) scheduler.reset()
 }
 
