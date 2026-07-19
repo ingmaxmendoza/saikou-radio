@@ -101,6 +101,7 @@ async function loadSettings() {
   settings = await window.saikouAPI.getSettings()
   theme.apply(settings.theme, settings.customThemePath)
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
+  syncDjBtn()
   audio.setFadeDuration(settings.fadeSeconds ?? 2)
   applyVolume(settings.volume ?? 1, false)
   if (visualizer) {
@@ -190,7 +191,7 @@ async function loadPlaylists(paths, { append = true } = {}) {
     djStatus.textContent = ''
     if (settings.shuffle && playlist.tracks.length > 1) buildShuffleQueue(isPlaying ? playlist.currentIndex : 0)
     if (!scheduler) {
-      scheduler = new BreakScheduler(settings.breakInterval, () => { breakPending = true })
+      scheduler = new BreakScheduler(settings.breakInterval, () => { if (settings.djEnabled !== false) breakPending = true })
       scheduler.start()
       startCountdownDisplay()
     }
@@ -513,7 +514,7 @@ function handleRemoteCommand(cmd) {
       }
       break
     case 'djbreak':
-      if (playlist.tracks.length) { breakPending = true; $('btn-next').click() }
+      if (playlist.tracks.length && settings.djEnabled !== false) { breakPending = true; $('btn-next').click() }
       break
     case 'queue-add':
       if (Number.isInteger(cmd.index) && playlist.tracks[cmd.index]) { requestQueue.push(cmd.index); pushRemoteState() }
@@ -579,6 +580,11 @@ function startCountdownDisplay() {
   if (countdownIntervalId) clearInterval(countdownIntervalId)
   countdownIntervalId = setInterval(() => {
     if (!scheduler) return
+    if (settings.djEnabled === false) {
+      djCountdown.textContent = 'OFF'
+      if (fsCountdown) fsCountdown.textContent = 'OFF'
+      return
+    }
     const ms = scheduler.remainingMs()
     const m = Math.floor(ms / 60000)
     const s = Math.floor((ms % 60000) / 1000)
@@ -630,6 +636,19 @@ const clearBtn = $('clear-btn')
 if (clearBtn) clearBtn.onclick = () => clearPlaylists()
 
 $('settings-btn').onclick = () => window.saikouAPI.openSettingsWindow()
+
+const djBtn = $('dj-btn')
+function syncDjBtn() {
+  djBtn.classList.toggle('off', settings.djEnabled === false)
+  djBtn.title = settings.djEnabled === false ? 'DJ breaks off — click to enable' : 'DJ breaks on — click to disable'
+}
+djBtn.onclick = () => {
+  settings.djEnabled = settings.djEnabled === false
+  if (!settings.djEnabled) breakPending = false
+  else if (scheduler) scheduler.reset()
+  window.saikouAPI.saveSettings({ djEnabled: settings.djEnabled })
+  syncDjBtn()
+}
 
 btnMono.onclick = () => {
   monoEnabled = !monoEnabled
