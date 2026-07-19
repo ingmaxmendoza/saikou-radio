@@ -17,6 +17,14 @@ class BreakScheduler {
     }, this._intervalMs)
   }
 
+  // Change the interval live; restarts the countdown only if it actually changed.
+  setInterval(intervalMinutes) {
+    const ms = intervalMinutes * 60 * 1000
+    if (ms === this._intervalMs) return
+    this._intervalMs = ms
+    if (this._timer !== null) this.reset()
+  }
+
   stop() {
     if (this._timer !== null) {
       clearTimeout(this._timer)

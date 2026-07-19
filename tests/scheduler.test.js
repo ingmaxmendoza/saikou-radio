@@ -36,6 +36,26 @@ test('reset restarts the countdown', () => {
   s.stop()
 })
 
+test('setInterval applies a new interval to a running countdown', () => {
+  const cb = jest.fn()
+  const s = new BreakScheduler(6666666, cb)
+  s.start()
+  s.setInterval(15)
+  expect(s.remainingMs()).toBeLessThanOrEqual(15 * 60 * 1000)
+  jest.advanceTimersByTime(15 * 60 * 1000)
+  expect(cb).toHaveBeenCalledTimes(1)
+  s.stop()
+})
+
+test('setInterval with the same value does not restart the countdown', () => {
+  const s = new BreakScheduler(15, () => {})
+  s.start()
+  jest.advanceTimersByTime(10 * 60 * 1000)
+  s.setInterval(15)
+  expect(s.remainingMs()).toBeLessThanOrEqual(5 * 60 * 1000)
+  s.stop()
+})
+
 test('remainingMs returns approximate remaining time', () => {
   const s = new BreakScheduler(15, () => {})
   s.start()

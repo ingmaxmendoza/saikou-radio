@@ -103,6 +103,7 @@ async function loadSettings() {
   theme.apply(settings.theme, settings.customThemePath)
   djJingles.textContent = settings.jinglesEnabled ? 'ON' : 'OFF'
   syncDjBtn()
+  if (scheduler) scheduler.setInterval(settings.breakInterval)
   audio.setFadeDuration(settings.fadeSeconds ?? 2)
   applyVolume(settings.volume ?? 1, false)
   if (visualizer) {
