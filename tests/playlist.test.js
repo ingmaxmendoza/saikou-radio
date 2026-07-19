@@ -77,3 +77,19 @@ test('clear empties tracks and resets index', () => {
   expect(pm.tracks.length).toBe(0)
   expect(pm.currentIndex).toBe(0)
 })
+
+test('removeWhere keeps current track index stable and clamps when removed', () => {
+  const pm = new PlaylistManager()
+  pm.addFromText('a.mp3\nb.mp3\nc.mp3', 'C:/pl/one.m3u')
+  pm.addFromText('d.mp3\ne.mp3', 'C:/pl/two.m3u')
+  pm.jumpTo(3) // d.mp3
+  // Remove the whole first playlist; current track (d) survives at new index 0
+  expect(pm.removeWhere(t => t.source === 'one')).toBe(true)
+  expect(pm.tracks).toHaveLength(2)
+  expect(pm.currentTrack().path).toBe('C:/pl/d.mp3')
+  expect(pm.currentIndex).toBe(0)
+  // Remove the current track itself; index clamps, returns false
+  expect(pm.removeWhere(t => t.path === 'C:/pl/d.mp3')).toBe(false)
+  expect(pm.tracks).toHaveLength(1)
+  expect(pm.currentTrack().path).toBe('C:/pl/e.mp3')
+})

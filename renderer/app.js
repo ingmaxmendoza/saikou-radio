@@ -118,17 +118,52 @@ async function loadSettings() {
 }
 
 // --- Playlist rendering ---
+function makeRemoveX(title, onRemove) {
+  const x = document.createElement('span')
+  x.className = 'pl-x'
+  x.title = title
+  x.textContent = '✕'
+  x.onclick = (e) => { e.stopPropagation(); onRemove() }
+  return x
+}
+
 function makeTrackRow(i) {
   const t = playlist.tracks[i]
   const isActive = i === playlist.currentIndex
   const div = document.createElement('div')
   div.className = 'pl-track' + (t.error ? ' error' : '') + (isActive ? ' active' : '')
-  div.textContent = (isActive ? '► ' : '') + (t.artist ? `${t.artist} - ${t.title}` : t.title)
+  const label = document.createElement('span')
+  label.className = 'pl-label'
+  label.textContent = (isActive ? '► ' : '') + (t.artist ? `${t.artist} - ${t.title}` : t.title)
+  div.append(label, makeRemoveX('Remove track', () => removeFromPlaylist(tr => tr === t)))
   div.onclick = () => {
     if (settings.shuffle) shufflePos = shuffleQueue.indexOf(i)
     playTrackAt(i)
   }
   return div
+}
+
+// Central removal: rebuilds every piece of index-based state after tracks shift.
+function removeFromPlaylist(pred) {
+  const wasPlayingCurrent = isPlaying && playlist.currentTrack() && pred(playlist.currentTrack())
+  const queuedTracks = requestQueue.map(i => playlist.tracks[i]).filter(Boolean)
+  playlist.removeWhere(pred)
+
+  if (playlist.tracks.length === 0) { clearPlaylists(); return }
+
+  requestQueue = queuedTracks.map(t => playlist.tracks.indexOf(t)).filter(i => i >= 0)
+  failedTracks.clear()
+  playlist.tracks.forEach((t, i) => { if (t.error) failedTracks.add(i) })
+  const liveSources = new Set(playlist.tracks.map(t => t.source))
+  loadedPlaylistPaths = loadedPlaylistPaths.filter(p => liveSources.has(path.basename(p, path.extname(p))))
+  window.saikouAPI.saveSettings({ lastPlaylists: loadedPlaylistPaths })
+
+  if (settings.shuffle && playlist.tracks.length > 1) buildShuffleQueue(playlist.currentIndex)
+  else { shuffleQueue = []; shufflePos = 0 }
+
+  if (wasPlayingCurrent) playTrackAt(playlist.currentIndex)
+  else { renderPlaylist(); updateNowPlaying() }
+  pushRemoteState()
 }
 
 function renderPlaylist() {
@@ -142,9 +177,13 @@ function renderPlaylist() {
   playlist.tracks.forEach((t, i) => {
     if (t.source !== lastSource) {
       lastSource = t.source
+      const src = t.source
       const h = document.createElement('div')
       h.className = 'pl-group'
-      h.textContent = t.source || 'Playlist'
+      const label = document.createElement('span')
+      label.className = 'pl-label'
+      label.textContent = src || 'Playlist'
+      h.append(label, makeRemoveX('Remove playlist', () => removeFromPlaylist(tr => tr.source === src)))
       playlistList.appendChild(h)
     }
     playlistList.appendChild(makeTrackRow(i))

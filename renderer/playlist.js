@@ -56,6 +56,16 @@ class PlaylistManager {
     }
   }
 
+  // Removes every track matching pred(track). Keeps _index on the same track
+  // when it survives; clamps it otherwise. Returns true if the current track survived.
+  removeWhere(pred) {
+    const current = this.tracks[this._index] ?? null
+    this.tracks = this.tracks.filter(t => !pred(t))
+    const idx = current ? this.tracks.indexOf(current) : -1
+    this._index = idx >= 0 ? idx : Math.min(this._index, Math.max(0, this.tracks.length - 1))
+    return idx >= 0
+  }
+
   currentTrack() {
     return this.tracks[this._index] ?? null
   }

@@ -161,6 +161,11 @@
     .pl-track:hover { background: var(--bg-secondary, #e4e4e8); }
     .pl-track.active { color: var(--text-accent, #00e5ff); font-weight: bold; }
     .pl-track.error { color: #cc4444; }
+    .pl-track, .pl-group { display: flex; align-items: center; }
+    .pl-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pl-x { display: none; margin-left: 6px; cursor: pointer; color: var(--text-secondary, #888); }
+    .pl-track:hover .pl-x, .pl-group:hover .pl-x { display: inline; }
+    .pl-x:hover { color: #cc4444; }
     #dj-panel {
       grid-column: 1 / -1;
       background: var(--bg-secondary, #e4e4e8);
