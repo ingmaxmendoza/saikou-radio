@@ -31,7 +31,8 @@ Grab the latest installer from [Releases](https://github.com/ingmaxmendoza/saiko
 
 | Version | Notes |
 |---------|-------|
-| **v2.3.1** | Fix: SAPI fallback TTS no longer breaks on double quotes in track titles or DJ lines (also closes a local command-injection path). Test reliability and internal cleanup. |
+| **v2.4.0** | DJ on/off toggle + on-demand BRK button, true crossfade, hardware media keys, session restore, drag-and-drop playlists, remove tracks/playlists from the sidebar, system tray (close hides to tray), live break-interval updates, offline DJ skip notice |
+| v2.3.1 | Fix: SAPI fallback TTS no longer breaks on double quotes in track titles or DJ lines (also closes a local command-injection path). Test reliability and internal cleanup. |
 | v2.3.0 | 8 new themes (Marlboro, Sakura, Game Boy, Nord, Gruvbox Dark, Catppuccin Latte, Aqua, Tokyo Night — 19 total), 5 new visualizers (waterfall, VU, starfield, plasma, aurora), theme-contract fixes, and a settings-window theme-flash fix |
 | v2.2.2 | Fix: remote applet now loads track/playlist/art on connect without needing to interact first |
 | v2.2.1 | Saikou icon (`.ico`), ASCII UI (no emoji), themed phone remote, remote sync fix |
