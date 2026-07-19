@@ -35,7 +35,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 | Property | Value |
 |---|---|
 | App name | Saikou Radio |
-| Version | 2.2.2 |
+| Version | 2.3.1 |
 | Platform | Windows (x64) |
 | Runtime | Electron 31.7.7 |
 | Entry point | `main/index.js` |
@@ -53,7 +53,7 @@ A Y2K-aesthetic desktop radio player built with Electron. Plays local audio play
 │           Main Process               │
 │  main/index.js   ← entry point       │
 │  main/ipc.js     ← all IPC handlers  │
-│  main/tts.js     ← TTS synthesis     │
+│  main/tts.js     ← Edge TTS synth    │
 │  main/settings.js← settings store   │
 │  main/preload.js ← window.saikouAPI  │
 └──────────────┬───────────────────────┘
@@ -85,7 +85,7 @@ saikou/
 │   ├── ipc.js            # All ipcMain handlers
 │   ├── preload.js        # Exposes window.saikouAPI to renderer
 │   ├── settings.js       # SettingsStore class + DEFAULTS
-│   └── tts.js            # Edge TTS + SAPI synthesis
+│   └── tts.js            # Edge TTS synthesis
 ├── renderer/
 │   ├── index.html        # Main player UI
 │   ├── app.js            # All renderer logic
@@ -149,13 +149,13 @@ Exposes `window.saikouAPI` — the only bridge between renderer and main. All re
 window.saikouAPI = {
   getSettings:       () => ipcRenderer.invoke('settings:get'),
   saveSettings:      (s) => ipcRenderer.invoke('settings:save', s),
-  synthesizeTTS:     async (text, engine, voice) => { ... },
+  synthesizeTTS:     async (text, voice) => { ... },
   openFileDialog:    (opts) => ipcRenderer.invoke('dialog:openFile', opts),
   openFolderDialog:  () => ipcRenderer.invoke('dialog:openFolder'),
   readFileAsBuffer:  (filePath) => ipcRenderer.invoke('fs:readFile', filePath),
   readMetadata:      (filePath) => ipcRenderer.invoke('metadata:read', filePath),
   openSettingsWindow:() => ipcRenderer.invoke('window:openSettings'),
-  listVoices:        (engine) => ipcRenderer.invoke('tts:listVoices', engine),
+  listVoices:        () => ipcRenderer.invoke('tts:listVoices'),
   setMiniMode:       (on) => ipcRenderer.invoke(on ? 'window:mini' : 'window:restore'),
 }
 ```
@@ -175,7 +175,7 @@ All handlers are registered in `main/ipc.js`.
 | `settings:notify-reload` | send | Settings window → main; triggers relay to renderer |
 | `settings:reload` | send | Main → renderer; triggers `loadSettings()` |
 | `tts:synthesize` | invoke | Synthesizes TTS; returns raw audio Buffer |
-| `tts:listVoices` | invoke | Returns available voices for Edge or SAPI engine |
+| `tts:listVoices` | invoke | Returns the curated Edge TTS voice list |
 | `dialog:openFile` | invoke | Opens native file picker; returns selected path or null |
 | `dialog:openFolder` | invoke | Opens native folder picker; returns selected path or null |
 | `fs:readFile` | invoke | Reads a file and returns its bytes; extension whitelist enforced |
@@ -296,7 +296,7 @@ For custom themes, `href` is set to `file://` + the absolute path provided by th
 
 ## Themes
 
-Six built-in themes, one custom option:
+19 built-in themes plus a custom option (`themes/*.css` is the authoritative list; NOTES.md documents the Theme Completeness Contract). The original six:
 
 | ID | Name | Description |
 |---|---|---|
@@ -412,20 +412,14 @@ await dj.runBreak()
 
 Handles actual speech synthesis in the main process.
 
-**Edge TTS (`msedge-tts` package):**
+**Edge TTS (`msedge-tts` package) — the only engine (SAPI was removed in v2.3.x):**
 - Uses Microsoft's unofficial Edge browser TTS API
 - Format: `AUDIO_24KHZ_96KBITRATE_MONO_MP3`
 - Returns a `Buffer` of MP3 data
 - Requires internet connection
 - Curated voice list of 10 EN/ES neural voices returned by `tts:listVoices`
 
-**SAPI (Windows Speech API):**
-- Runs a PowerShell script via `execSync` using `System.Speech.Synthesis.SpeechSynthesizer`
-- Writes WAV to a temp file (`saikou-tts-<timestamp>.wav`), reads it, deletes it
-- Fully offline; uses Windows installed voices
-- Voice list retrieved by querying `$s.GetInstalledVoices()` via PowerShell
-
-**Fallback behavior:** If Edge TTS is selected but fails (e.g., no internet), SAPI is used automatically. If the voice name contains "Neural" it's clearly an Edge voice name and won't work with SAPI, so `Microsoft Zira Desktop` is used as the SAPI fallback.
+**Offline behavior:** If synthesis fails (e.g. no internet), the break is skipped, the DJ status shows "DJ skipped — TTS unavailable", and music continues. The next scheduled break tries again.
 
 ---
 
@@ -435,7 +429,7 @@ Handles actual speech synthesis in the main process.
 
 Owns a `<canvas>` element and reads frequency/waveform data from an `AnalyserNode` supplied via a `getAnalyser` callback passed to the constructor.
 
-**Visualizer styles (4 total):**
+**Visualizer styles (9 total):**
 
 | Style | Description |
 |---|---|
@@ -443,6 +437,11 @@ Owns a `<canvas>` element and reads frequency/waveform data from an `AnalyserNod
 | `scope` | Oscilloscope waveform |
 | `radial` | Radial/circular frequency display |
 | `particles` | Particle system driven by audio amplitude |
+| `waterfall` | Scrolling spectrogram |
+| `vu` | Dual VU meters with accent/yellow/red zones |
+| `starfield` | 3D warp tunnel driven by bass energy |
+| `plasma` | Sine-composite fluid waves (offscreen canvas) |
+| `aurora` | Waveform-history ribbons with opacity trails |
 
 **Color handling:** Colors are read live from the active theme's CSS custom properties (`--text-accent`, `--text-secondary`, `--bg-lcd`) via an internal `resolveThemeColor` helper that calls `getComputedStyle`. Colors are refreshed automatically when the theme changes.
 
@@ -706,8 +705,9 @@ Persists settings to `<userData>/settings.json`. `userData` is the Electron app 
 | Key | Default | Description |
 |---|---|---|
 | `breakInterval` | `15` | Minutes between DJ breaks |
-| `ttsEngine` | `'edge'` | `'edge'` or `'sapi'` |
-| `ttsVoice` | `'en-US-AriaNeural'` | Voice name |
+| `djEnabled` | `true` | Master DJ switch (toolbar DJ button) — off = no breaks at all |
+| `lastPlaylists` | `[]` | Paths of last-loaded `.m3u` files; restored on launch |
+| `ttsVoice` | `'en-US-AriaNeural'` | Edge TTS voice name |
 | `jinglesEnabled` | `false` | Whether to play a jingle before TTS |
 | `jinglesFolder` | `''` | Absolute path to folder of jingle audio files |
 | `theme` | `'y2k-silver'` | Active theme ID |
@@ -964,6 +964,9 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 | 2.2.0 | Saikou app icon (PNG), emoji → ASCII UI buttons, themed remote applet, remote sync fix |
 | 2.2.1 | Proper `.ico` icon file wired into BrowserWindow and electron-builder |
 | 2.2.2 | Fix: remote applet requests fresh state on SSE connect so data loads immediately |
+| 2.3.0 | 8 new themes (19 total), 5 new visualizers (9 total), theme-contract fixes, settings theme-flash fix |
+| 2.3.1 | SAPI removed — Edge TTS is the only engine; test/cleanup work |
+| unreleased | DJ toggle + BRK buttons, hardware media keys, session restore, drag & drop, true crossfade, system tray (close hides to tray), offline DJ skip notice |
 
 ---
 
@@ -998,6 +1001,6 @@ The `rcedit` step (stamping version metadata into the exe) fails if the app is c
 
 **`contextIsolation: false`:** The app runs with context isolation disabled, meaning `require()` is available directly in the renderer. This simplifies the architecture at the cost of the isolation security boundary. Since this is a local desktop app with no remote content loaded, the risk is accepted.
 
-**Edge TTS requires internet:** The Edge TTS voice list and synthesis both require an active internet connection. If unavailable, synthesis fails and falls back to SAPI. SAPI runs fully offline using Windows installed voices.
+**Edge TTS requires internet:** The Edge TTS voice list and synthesis both require an active internet connection. If unavailable, the DJ break is skipped with a visible status note and music continues uninterrupted.
 
 **Settings window theme:** The settings window loads its own `<link id="theme-link">` and applies theme changes live as you switch the dropdown. It does not inherit the main window's current state — it reads the saved theme from settings on open.

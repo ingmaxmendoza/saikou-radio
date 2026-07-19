@@ -16,7 +16,12 @@ Built with Electron.
 - **9 visualizer styles** — bars, waterfall spectrogram, VU meters, starfield warp, plasma, aurora ribbons and more
 - **Phone remote** — control playback from any phone on the same Wi-Fi, themed to match the desktop
 - **Timers** — Pomodoro timer and sleep timer with bilingual TTS announcements
-- **Customizable** — edit the DJ's personality phrases, pick your TTS voice, set the break interval
+- **Customizable** — edit the DJ's personality phrases, pick your TTS voice, set the break interval, or switch the DJ off entirely with one button
+- **Crossfade** — tracks blend into each other like a real station
+- **Hardware media keys** — play/pause/next/prev from your keyboard, even unfocused
+- **System tray** — closing the window keeps the music playing; transport controls in the tray menu
+- **Session restore** — reopens your last playlists on launch
+- **Drag & drop** — drop `.m3u` files onto the window to load them
 
 ---
 
